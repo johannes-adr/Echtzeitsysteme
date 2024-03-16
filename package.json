@@ -1,0 +1,19 @@
+{
+  "name": "echtzeitsysteme",
+  "module": "main.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun run src/main.ts",
+    "watch": "esbuild src/web/index.ts --bundle --outfile=out.js --watch --minify"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "esbuild": "^0.20.2",
+    "gojs": "^2.3.16"
+  }
+}

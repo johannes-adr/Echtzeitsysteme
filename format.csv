@@ -1,0 +1,23 @@
+# Task, TaskID, Activity, Duration
+
+Task, 1, A_1, 3
+Task, 2, A_2, 1
+Task, 3, A_3, 1
+Task, 4, A_4, 1
+Task, 5, A_5a, 3
+Task, 5, A_5b, 3
+Task, 6, A_6, 2
+
+# Semaphore, Wert, Endwert, Startwert +,
+Sema, 0, A_5b, A_5a
+Sema, 1, A_5a, A_5b
+Sema, 1, A_1, A_5b
+Sema, 0, A_2, A_1
+Sema, 0, A_4, A_2
+Sema, 0, A_3, A_1
+Sema, 0, A_6, A_3
+Sema, 0, A_6, A_4
+Sema, 0, A_5a, A_6
+
+#Mutex, Prioritäten Aktivitäten
+Mutex, A_2,A_3,A_4
