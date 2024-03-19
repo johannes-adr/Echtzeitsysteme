@@ -1,7 +1,7 @@
 import { removeSameProps } from "./utils";
 
 type Semaphore = { start: string[], end: string[], val: number }
-type SimulationData = {
+export type SimulationData = {
     activities: { [key: string]: number },
     semaphores: Semaphore[],
     mutexes: string[][];
@@ -35,13 +35,14 @@ export class Simulation {
     private blueprint: SimulationData;
     private observers: Observer[] = [];
     private prevState: SimulationData;
-
-    constructor(private front: SimulationData) {
-        this.blueprint = JSON.parse(JSON.stringify(front)) as SimulationData;
+    private front: SimulationData;
+    constructor(front: SimulationData) {
+        this.blueprint = front
+        this.front = JSON.parse(JSON.stringify(front)) as SimulationData;
         this.prevState = JSON.parse(JSON.stringify(front)) as SimulationData;
 
         for (let key in front.activities) {
-            front.activities[key] = 0;
+            this.front.activities[key] = 0;
         }
     }
 
@@ -143,7 +144,6 @@ export class Simulation {
                 //Every semaphore is != 0 => ready
                 if(isReady){
                     sems.forEach(s=>s.val--);
-                    console.log("down", act)
                     this.front.activities[act] = this.blueprint.activities[act];
                 }
             }

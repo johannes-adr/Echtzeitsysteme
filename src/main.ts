@@ -27,20 +27,26 @@
 
 import fs from "fs/promises";
 import { removeSameProps } from "./utils";
-import { Simulation, example } from "./simulation";
+import { Simulation, type SimulationData } from "./simulation";
 
 async function main(){
-    const simulation = new Simulation(example);
+  
 
-    let file = await fs.readFile("src/testSteps.json");
-    let tests: any[] = JSON.parse(file.toString());
-    for(let test of tests){
-        simulation.doCycle();
-        let changes = simulation.findChanges();
-        console.log(JSON.stringify(test) == JSON.stringify(changes));
+    for(let fname of await fs.readdir("src/tests/")){
+        let file = await fs.readFile("src/tests/"+fname);
+        let tests: {changelog: any[], example: SimulationData}= JSON.parse(file.toString());
+        const simulation = new Simulation(tests.example);
+        for (let test of tests.changelog) {
+            simulation.doCycle();
+            let changes = simulation.findChanges();
+            
+            if(JSON.stringify(test) != JSON.stringify(changes)){
+                throw new Error("Error - not identical!")
+            }
+        }
+        console.log("Done",fname)
+
     }
-    simulation.doCycle();
-    console.log(JSON.stringify(simulation.findChanges()))
 }
 
 main();

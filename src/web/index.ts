@@ -1,5 +1,6 @@
 import * as go from "gojs";
 import { Simulation, example } from "../simulation";
+import { download } from "../utils";
 interface NodeData {
     key: string;
     text: string;
@@ -124,7 +125,6 @@ function init() {
     }
 
 
-    let button = document.getElementById("nextCycle")!;
 
     //Simulate init state
     {
@@ -141,11 +141,22 @@ function init() {
        
     }
 
-
-    button.onclick = () => {
+    let changelog: any[] = [];
+    document.getElementById("nextCycle")!.onclick = () => {
         sim.doCycle();
         let changes = sim.findChanges()
         applyChanges(changes);
+        changelog.push(changes);
+    };
+
+    
+    document.getElementById("save")!.onclick = () => {
+        let json = JSON.stringify({
+            example: example,
+            changelog
+        });
+        console.log("hi")
+        download("changes.json",json)
     };
 
 }
