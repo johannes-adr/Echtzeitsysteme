@@ -4,10 +4,11 @@ import { download } from "../utils";
 interface NodeData {
     key: string;
     text: string;
-    color: string;
+    color?: string;
     parent?: string;
     group?: string;
     isGroup?: boolean
+    category: string;
 }
 
 interface LinkData {
@@ -16,6 +17,7 @@ interface LinkData {
     color: string;
     name?: string;
     value?: number;
+    category: string;
 }
 
 interface GroupData {
@@ -37,20 +39,33 @@ function init() {
     myDiagram.layout = $(go.ForceDirectedLayout);
 
     const nodeTemplate = $(go.Node, "Auto",
-        $(go.Shape, "RoundedRectangle", { fill: "white" },
+        $(go.Shape, "RoundedRectangle", { fill: "lightblue" },
             new go.Binding("fill", "color")),
         $(go.TextBlock, { margin: 4 },
             new go.Binding("text", "text"))
     );
-
-    const linkTemplate = $(go.Link,
-        $(go.Shape, { strokeWidth: 2 },
-            new go.Binding("stroke", "color")),
-        $(go.Shape, { toArrow: "Standard", stroke: null },
-            new go.Binding("fill", "color")),
-        $(go.TextBlock, { textAlign: "center", margin: 4 },
-            new go.Binding("text", "name"))
+    const mutex: go.Node = $(
+        go.Node, "Auto",
+        $(go.Shape, "Rectangle", { fill: "red" }),
+        $(go.TextBlock, { margin: 4 },
+            new go.Binding("text", "text"))
     );
+    const linkMutex: go.Link = $(go.Link, // the whole link panel
+    $(go.Shape, { strokeDashArray: [10, 5] }) // the link shape with dashed pattern
+);
+
+const linkTemplate = $(go.Link,
+    $(go.Shape, 
+        { strokeWidth: 2 },
+        new go.Binding("stroke", "color")), // Linienfarbe basierend auf der "color"-Eigenschaft
+    $(go.Shape, 
+        { toArrow: "Standard", stroke: null },
+        new go.Binding("fill", "color")), // Pfeilfarbe ebenfalls basierend auf der "color"-Eigenschaft
+    $(go.TextBlock, 
+        { textAlign: "center", margin: 4 },
+        new go.Binding("text", "name"))
+);
+
 
     const groupTemplate = $(go.Group, "Vertical",
         $(go.TextBlock,
@@ -62,11 +77,18 @@ function init() {
                 { fill: "rgba(128,128,128,0.2)", stroke: "gray", strokeWidth: 3 }),
             $(go.Placeholder, { padding: 10 }))
     );
+    
 
-    myDiagram.nodeTemplate = nodeTemplate;
-    myDiagram.linkTemplate = linkTemplate;
+    const mapNode: go.Map<string, go.Node> = new go.Map<string, go.Node>();
+    mapNode.add("node", nodeTemplate);
+    mapNode.add("mutex", mutex);
+    const mapLink: go.Map<string, go.Link> = new go.Map<string, go.Link>();
+    mapLink.add("normalLink",linkTemplate);
+    mapLink.add("mutex",linkMutex);
+    myDiagram.nodeTemplateMap = mapNode;
+    myDiagram.linkTemplateMap = mapLink;
     myDiagram.groupTemplate = groupTemplate;
-
+    
     const nodeDataArray: NodeData[] = [];
 
     const linkDataArray: LinkData[] = [];
@@ -75,21 +97,25 @@ function init() {
 
 
     for (let activity in sim.getData().activities) {
-        nodeDataArray.push({ key: activity, text: `Activity ${activity}`, color: "lightblue" })
+        nodeDataArray.push({ key: activity, text: `Activity ${activity}`,category:"node" })
     }
 
     for (let mutex of sim.getData().mutexes) {
         let key = JSON.stringify(mutex);
-        nodeDataArray.push({ key, text: `Activity ${key}`, color: "lightblue", isGroup: true });
+        nodeDataArray.push({ key:JSON.stringify(mutex), text: `Mutex ${key}`, category: "mutex"});
         for (let act of mutex) {
             nodeDataArray.find(s => s.key == act)!.group = key;
+            console.log(nodeDataArray.find(s => s.key == act)!.group)
+            linkDataArray.push({ from: act, to: JSON.stringify(mutex), color: "black", category:"mutex" })
         }
+
+        
     }
 
     for (let sems of sim.getData().semaphores) {
         for (let from of sems.start) {
             for (let to of sems.end) {
-                linkDataArray.push({ from, to, color: "black", name: `${from}-${to} `, value: sems.val })
+                linkDataArray.push({ from, to, color: "black", name: `${from}-${to} `, value: sems.val, category:"normalLink" })
             }
         }
     }
