@@ -18,6 +18,7 @@ interface LinkData {
     name?: string;
     value?: number;
     category: string;
+
 }
 
 interface GroupData {
@@ -54,16 +55,36 @@ function init() {
     $(go.Shape, { strokeDashArray: [10, 5] }) // the link shape with dashed pattern
 );
 
-const linkTemplate = $(go.Link,
-    $(go.Shape, 
-        { strokeWidth: 2 },
-        new go.Binding("stroke", "color")), // Linienfarbe basierend auf der "color"-Eigenschaft
-    $(go.Shape, 
-        { toArrow: "Standard", stroke: null },
-        new go.Binding("fill", "color")), // Pfeilfarbe ebenfalls basierend auf der "color"-Eigenschaft
-    $(go.TextBlock, 
-        { textAlign: "center", margin: 4 },
-        new go.Binding("text", "name"))
+const linkTemplate = $(go.Link,  // the whole link panel
+{ toShortLength: 3, relinkableFrom: true, relinkableTo: true },
+$(go.Shape,  // the link shape
+  { strokeWidth: 2 },
+  new go.Binding("stroke", "color")),
+$(go.Shape,  // the arrowhead
+  { toArrow: "Standard", stroke: null },
+  new go.Binding("fill", "color")),
+$(go.Panel, "Vertical",  // panel to hold the text blocks
+  $(go.TextBlock,  // the text block for the name
+    {
+      font: "bold 12px sans-serif",
+      stroke: "#333",
+      background: "white",
+      textAlign: "center",
+      margin: new go.Margin(0, 4, 4, 4)  // margin to create space between the text and the line
+    },
+    new go.Binding("text", "name")),
+  $(go.Shape, "LineH",  // horizontal line to separate the name and value
+    { stroke: "#333", strokeWidth: 1, height: 1, width: 50 }),
+  $(go.TextBlock,  // the text block for the value
+    {
+      font: "bold 12px sans-serif",
+      stroke: "#333",
+      background: "white",
+      textAlign: "center",
+      margin: new go.Margin(4, 4, 0, 4)  // margin to create space between the line and the value
+    },
+    new go.Binding("text", "value"))
+),
 );
 
 
@@ -115,7 +136,7 @@ const linkTemplate = $(go.Link,
     for (let sems of sim.getData().semaphores) {
         for (let from of sems.start) {
             for (let to of sems.end) {
-                linkDataArray.push({ from, to, color: "black", name: `${from}-${to} `, value: sems.val, category:"normalLink" })
+                linkDataArray.push({ from, to, color: "black", name: `${from}-${to} `, value: sems.val, category:"normalLink"})
             }
         }
     }
@@ -144,6 +165,7 @@ const linkTemplate = $(go.Link,
                         //@ts-ignore
                         const link = myDiagram.model.linkDataArray.find(link => link.from === from && link.to === to);
                         myDiagram.model.setDataProperty(link, "color", toSemVal==0?"black":"red");
+                        myDiagram.model.setDataProperty(link, "value", toSemVal);
                     }
                 }
             }

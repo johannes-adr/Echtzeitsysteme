@@ -22,7 +22,8 @@ export const example: SimulationData = {
         { start: ["a6"], end: ["a5"], val: 0 }
     ],
     mutexes: [
-        ["a2", "a3", "a4"]
+        ["a2", "a3", "a4"],
+        ["a1", "a2", "a3"]
     ]
 };
 
