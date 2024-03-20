@@ -29,19 +29,12 @@ interface GroupData {
     isGroup: boolean;
 }
 
-export function initGo(data: SimulationData, element: HTMLDivElement) {
-    // let simulationData = parseCSV(csv);
+export type gojsElementClickEventHandler = (
+   event: {typ: "mutex", mutexid: number} | {typ: "semaphore", semaphoreid: number} | {typ: "activity", activitName: string}
+)=>void;
+
+export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsElementClickEventHandler) {
     const $ = go.GraphObject.make;
-
-    // let oldElems = document.getElementsByClassName("myDiagramDiv")
-    // for(let idx = 0;idx < oldElems.length; idx++){
-    //     oldElems.item(idx)?.remove();
-    // }
-
-    // let elem = document.createElement("div");
-    // elem.classList.add("myDiagramDiv")
-    // document.body.appendChild(elem);
-
     const myDiagram = $(go.Diagram, element, {
         "clickCreatingTool.archetypeNodeData": { text: "Node", color: "white" },
         "commandHandler.archetypeGroupData": { text: "Group", isGroup: true, color: "blue" },
@@ -171,24 +164,6 @@ export function initGo(data: SimulationData, element: HTMLDivElement) {
 
         return sim;
     }
-
-    // let changelog: any[] = [];
-    // document.getElementById("nextCycle")!.onclick = () => {
-    //     sim.doCycle();
-    //     let changes = sim.findChanges()
-    //     applyChanges(changes);
-    //     changelog.push(changes);
-    // };
-
-    // document.getElementById("save")!.onclick = () => {
-    //     let json = JSON.stringify({
-    //         example: example,
-    //         changelog
-    //     });
-    //     console.log("hi")
-    //     download("changes.json", json)
-    // };
-
     return reload
 }
 

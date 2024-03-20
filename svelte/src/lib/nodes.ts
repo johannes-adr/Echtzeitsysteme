@@ -2,10 +2,18 @@ export type Semaphore = { start: string[], end: string, val: number }
 export type Activities = { [key: string]: number }
 export type Mutex = string[]
 
+
+export type Coord = {x:number,y:number}
+
 export type SimulationData = {
     activities: Activities,
     semaphores: Semaphore[],
-    mutexes: Mutex[]
+    mutexes: Mutex[],
+    position?: {
+        activities: {[key: string]: Coord},
+        semaphores: Coord[],
+        mutex: Coord[]
+    }
 }
 
 

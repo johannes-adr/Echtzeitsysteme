@@ -30,7 +30,7 @@ Semaphore, 0, a_5, a_6
 Mutex, a_2,a_3,a_4`
 
     onMount(()=>{
-        let reload = initGo(parseCSV(csv),root);
+        let reload = initGo(parseCSV(csv),root, (ev)=>{})
         let sim = reload();
 
         // setInterval(()=>sim.doCycle(),1000)
