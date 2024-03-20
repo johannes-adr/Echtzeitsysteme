@@ -30,7 +30,7 @@ interface GroupData {
 }
 
 export type gojsElementClickEventHandler = (
-   event: {typ: "mutex", mutexid: number} | {typ: "semaphore", semaphoreid: number} | {typ: "activity", activitName: string}
+   event: {typ: "mutex", mutexid: string} | {typ: "semaphore", semaphoreid: string} | {typ: "activity", activitName: string}
 )=>void;
 
 export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsElementClickEventHandler) {
