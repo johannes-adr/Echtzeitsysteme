@@ -2,25 +2,49 @@ import type { SimulationData } from "./nodes";
 import { removeSameProps } from "./utils";
 
 
-export const example: SimulationData = {
-    activities: { a_1: 3, a_2: 5, a_3: 1, a_4: 3, a_5: 2, b_5: 2, a_6: 2 },
-    semaphores: [
-        { start: ["a_5"], end: "b_5", val: 0 },
-        { start: ["b_5"], end: "a_5", val: 1 },
-        { start: ["b_5"], end: "a_1", val: 1 },
-        { start: ["a_1"], end: "a_3", val: 0 },
-        { start: ["a_1"], end: "a_2", val: 0 },
-        { start: ["a_2"], end: "a_4", val: 0 },
-        // { start: ["a3","a4"], end: ["a6"], val: 0 },
-        { start: ["a_3"], end: "a_6", val: 0 },
-        { start: ["a_4"], end: "a_6", val: 0 },
-        { start: ["a_6"], end: "a_5", val: 0 }
-    ],
-    mutexes: [
-        ["a_2", "a_3", "a_4"],
-        ["a_1", "a_2", "a_3"]
-    ],
-};
+export const EXAMPLE_CSV = `# Activity, activity_task, Duration
+
+Activity, a_1, 3
+Activity, a_2, 1
+Activity, a_3, 1
+Activity, a_4, 1
+Activity, a_5, 3
+Activity, b_5, 3
+Activity, a_6, 2
+
+# Semaphore, Wert, Endwert, Startwert +,
+Semaphore, 0, b_5, a_5
+Semaphore, 1, a_5, b_5
+Semaphore, 1, a_1, b_5
+Semaphore, 0, a_2, a_1
+Semaphore, 0, a_4, a_2
+Semaphore, 0, a_3, a_1
+Semaphore, 0, a_6, a_3
+Semaphore, 0, a_6, a_4
+Semaphore, 0, a_5, a_6
+
+# Mutex, Prioritäten Aktivitäten
+Mutex, a_2,a_3,a_4`
+
+// export const example: SimulationData = {
+//     activities: { a_1: 3, a_2: 5, a_3: 1, a_4: 3, a_5: 2, b_5: 2, a_6: 2 },
+//     semaphores: [
+//         { start: ["a_5"], end: "b_5", val: 0 },
+//         { start: ["b_5"], end: "a_5", val: 1 },
+//         { start: ["b_5"], end: "a_1", val: 1 },
+//         { start: ["a_1"], end: "a_3", val: 0 },
+//         { start: ["a_1"], end: "a_2", val: 0 },
+//         { start: ["a_2"], end: "a_4", val: 0 },
+//         // { start: ["a3","a4"], end: ["a6"], val: 0 },
+//         { start: ["a_3"], end: "a_6", val: 0 },
+//         { start: ["a_4"], end: "a_6", val: 0 },
+//         { start: ["a_6"], end: "a_5", val: 0 }
+//     ],
+//     mutexes: [
+//         ["a_2", "a_3", "a_4"],
+//         ["a_1", "a_2", "a_3"]
+//     ],
+// };
 
 
 type Observer = (changes: Record<string, any>) => void;
