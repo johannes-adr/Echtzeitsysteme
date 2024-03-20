@@ -1,109 +1,98 @@
-export class FlowChart {
-    tasks: Map<string, Task> = new Map()
-    semaphores: Semaphore[] = []
-    mutexes: Mutex[] = [];
+export type Semaphore = { start: string[], end: string, val: number }
+export type Activities = { [key: string]: number }
+export type Mutex = string[]
 
-    json() {
-        return JSON.stringify({
-            tasks: Array.from(this.tasks.values()),
-            semaphores: this.semaphores,
-            mutexes: this.mutexes
-        }, null, 0)
-    }
-
-    findActivity(name:string): Activity{
-        for (let task of this.tasks.values()){
-            let res = task.activities.find(s=>s.name == name);
-            if(res)return res;
-        }
-
-        throw new Error("Activity '" + name + "' not defined")
-    }
+export type SimulationData = {
+    activities: Activities,
+    semaphores: Semaphore[],
+    mutexes: Mutex[]
 }
 
-export abstract class Node {
 
-    static parse(line: string[], nodes: FlowChart) {
-        console.log(line)
+export function parseCSV(csv: string) {
+    let res = csv.split("\n").filter(s => {
+        return !(s.startsWith("#") || s.startsWith(" ") || s.length == 0)
+    });
 
-        let type = line.shift();
-        switch (type) {
-            case "task":
-                Task.parse(line, nodes);
-                break;
-            case "sema":
-                Semaphore.parse(line, nodes);
-                break;
-            case "mutex":
-                Mutex.parse(line, nodes);
-                break;
-            default:
-                throw new Error("Unknown Typ: " + type)
-        }
-    }
-}
+    let parsed = res.map(line => line.split(",").map(s => s.trim().toLowerCase()));
 
-export class Activity {
-    constructor(readonly name: string, readonly cycles: number, private task: Task) { }
 
-    toJSON(){
-        return this.name
-    }
-}
-
-export class Task extends Node {
-    readonly activities: Activity[];
-
-    constructor(readonly name: string, ...activities: Activity[]) {
-        super()
-        this.activities = activities
+    let data: SimulationData = {
+        activities: {},
+        semaphores: [],
+        mutexes: []
     }
 
-    toJSON(){
-        return {
-            name: this.name,
-            activities: this.activities.map(a=>{return {name: a.name, cycles: a.cycles}})
+
+    for (let line of parsed) {
+        try {
+            let type = line.shift();
+
+            switch (type) {
+                case "activity":
+                    parseActivity(data.activities,line);
+                    break;
+                case "semaphore":
+                    data.semaphores.push(parseSemaphore(line))
+                    break;
+                case "mutex":
+                    data.mutexes.push(parseMutex(line))
+                    break;
+
+                default:
+                    throw new Error(`Type '${type}' is not valid`,{cause: "parseError"})
+            }
+        } catch (error) {
+            if (error instanceof Error && error.cause == "parseError") {
+                console.error(error.message);
+            } else {
+                throw error
+            }
         }
     }
 
-    static parse(s: string[], nodes: FlowChart) {
-        let [name, activity, cycles] = s;
-        let task = nodes.tasks.get(name)
-        if (!task) {
-            task = new Task(name);
-            nodes.tasks.set(name, task);
+    return data;
+}
+
+
+
+function parseActivity(activities: Activities, lines: string[]) {
+    let [name, value] = lines;
+    //assert that an activity
+    activities_valid(name);
+
+    activities[name] = Number.parseInt(value);
+}
+
+function parseSemaphore(lines: string[]): Semaphore {
+    let value = lines.shift();
+    let endact = lines.shift();
+    let startsact = lines;
+    if (startsact.length == 0) {
+        throw new Error("Semaphore needs at least one activity", { cause: "parseError" })
+    }
+    activities_valid(endact!, ...startsact);
+
+    return { end: endact!, start: startsact, val: Number.parseInt(value!) }
+}
+
+function parseMutex(lines: string[]): Mutex {
+    activities_valid(...lines);
+    return lines;
+}
+
+
+
+function activities_valid(...act_names: string[]) {
+    let regex = /^([a-zA-Z]+)_([0-9]+)$/;
+
+    for (let act_name of act_names) {
+        if (typeof act_name !== "string") {
+            throw new Error("Activity name has to be a string", { cause: "parseError" })
         }
-
-        let activityObj: Activity = new Activity(activity, Number.parseInt(cycles),task);
-        task.activities.push(activityObj);
-
-    }
-}
-
-
-class Semaphore extends Node{
-    constructor(public startVal: number,readonly startActivity: Activity[], readonly endActivity: Activity){
-        super()
-    }
-
-    static parse(s: string[], nodes: FlowChart) {
-        let [startVal, endActivity, ...startActivity] = s;
-
-
-        nodes.semaphores.push(new Semaphore(
-            Number.parseInt(startVal),
-            startActivity.map(name=>nodes.findActivity(name)),
-            nodes.findActivity(endActivity)    
-        ))
-    }
-}
-
-class Mutex extends Node{
-    constructor(readonly activities: Activity[]){
-        super()
-    }
-
-    static parse(s: string[], nodes: FlowChart) {
-        nodes.mutexes.push(new Mutex(s.map(name=>nodes.findActivity(name))))
+        let match = act_name.match(regex)!;
+        if (!match[0]) {
+            throw new Error("Activity has to follow following regex pattern: ^([a-zA-Z]+)_([0-9]+)$", { cause: "parseError" });
+        }
     }
 }

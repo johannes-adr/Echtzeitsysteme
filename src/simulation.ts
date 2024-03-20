@@ -1,29 +1,24 @@
+import type { SimulationData } from "./nodes";
 import { removeSameProps } from "./utils";
 
-type Semaphore = { start: string[], end: string[], val: number }
-export type SimulationData = {
-    activities: { [key: string]: number },
-    semaphores: Semaphore[],
-    mutexes: string[][];
-}
 
 export const example: SimulationData = {
-    activities: { a1: 3, a2: 5, a3: 1, a4: 3, a5: 2, b5: 2, a6: 2 },
+    activities: { a_1: 3, a_2: 5, a_3: 1, a_4: 3, a_5: 2, b_5: 2, a_6: 2 },
     semaphores: [
-        { start: ["a5"], end: ["b5"], val: 0 },
-        { start: ["b5"], end: ["a5"], val: 1 },
-        { start: ["b5"], end: ["a1"], val: 1 },
-        { start: ["a1"], end: ["a3"], val: 0 },
-        { start: ["a1"], end: ["a2"], val: 0 },
-        { start: ["a2"], end: ["a4"], val: 0 },
+        { start: ["a_5"], end: "b_5", val: 0 },
+        { start: ["b_5"], end: "a_5", val: 1 },
+        { start: ["b_5"], end: "a_1", val: 1 },
+        { start: ["a_1"], end: "a_3", val: 0 },
+        { start: ["a_1"], end: "a_2", val: 0 },
+        { start: ["a_2"], end: "a_4", val: 0 },
         // { start: ["a3","a4"], end: ["a6"], val: 0 },
-        { start: ["a3"], end: ["a6"], val: 0 },
-        { start: ["a4"], end: ["a6"], val: 0 },
-        { start: ["a6"], end: ["a5"], val: 0 }
+        { start: ["a_3"], end: "a_6", val: 0 },
+        { start: ["a_4"], end: "a_6", val: 0 },
+        { start: ["a_6"], end: "a_5", val: 0 }
     ],
     mutexes: [
-        ["a2", "a3", "a4"],
-        ["a1", "a2", "a3"]
+        ["a_2", "a_3", "a_4"],
+        ["a_1", "a_2", "a_3"]
     ]
 };
 
@@ -139,7 +134,7 @@ export class Simulation {
                     }
                 }
 
-                let sems = this.front.semaphores.filter(s => s.end.includes(act));
+                let sems = this.front.semaphores.filter(s => s.end == act);
                 let isReady = sems.find(sem => sem.val == 0) == undefined;
 
                 //Every semaphore is != 0 => ready

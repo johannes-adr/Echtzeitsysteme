@@ -1,6 +1,7 @@
 import * as go from "gojs";
-import { Simulation, example } from "../simulation";
+import { Simulation } from "../simulation";
 import { download } from "../utils";
+import { parseCSV } from "../nodes";
 interface NodeData {
     key: string;
     text: string;
@@ -28,14 +29,25 @@ interface GroupData {
     isGroup: boolean;
 }
 
-function init() {
+function init(csv: string) {
+    let simulationData = parseCSV(csv);
     const $ = go.GraphObject.make;
 
-    const myDiagram = $(go.Diagram, "myDiagramDiv", {
+    let oldElems = document.getElementsByClassName("myDiagramDiv")
+    for(let idx = 0;idx < oldElems.length; idx++){
+        oldElems.item(idx)?.remove();
+    }
+
+    let elem = document.createElement("div");
+    elem.classList.add("myDiagramDiv")
+    document.body.appendChild(elem);
+
+    const myDiagram = $(go.Diagram, elem, {
         "clickCreatingTool.archetypeNodeData": { text: "Node", color: "white" },
         "commandHandler.archetypeGroupData": { text: "Group", isGroup: true, color: "blue" },
         "undoManager.isEnabled": true
     });
+    
 
     myDiagram.layout = $(go.ForceDirectedLayout);
 
@@ -52,40 +64,40 @@ function init() {
             new go.Binding("text", "text"))
     );
     const linkMutex: go.Link = $(go.Link, // the whole link panel
-    $(go.Shape, { strokeDashArray: [10, 5] }) // the link shape with dashed pattern
-);
+        $(go.Shape, { strokeDashArray: [10, 5] }) // the link shape with dashed pattern
+    );
 
-const linkTemplate = $(go.Link,  // the whole link panel
-{ toShortLength: 3, relinkableFrom: true, relinkableTo: true },
-$(go.Shape,  // the link shape
-  { strokeWidth: 2 },
-  new go.Binding("stroke", "color")),
-$(go.Shape,  // the arrowhead
-  { toArrow: "Standard", stroke: null },
-  new go.Binding("fill", "color")),
-$(go.Panel, "Vertical",  // panel to hold the text blocks
-  $(go.TextBlock,  // the text block for the name
-    {
-      font: "bold 12px sans-serif",
-      stroke: "#333",
-      background: "white",
-      textAlign: "center",
-      margin: new go.Margin(0, 4, 4, 4)  // margin to create space between the text and the line
-    },
-    new go.Binding("text", "name")),
-  $(go.Shape, "LineH",  // horizontal line to separate the name and value
-    { stroke: "#333", strokeWidth: 1, height: 1, width: 50 }),
-  $(go.TextBlock,  // the text block for the value
-    {
-      font: "bold 12px sans-serif",
-      stroke: "#333",
-      background: "white",
-      textAlign: "center",
-      margin: new go.Margin(4, 4, 0, 4)  // margin to create space between the line and the value
-    },
-    new go.Binding("text", "value"))
-),
-);
+    const linkTemplate = $(go.Link,  // the whole link panel
+        { toShortLength: 3, relinkableFrom: true, relinkableTo: true },
+        $(go.Shape,  // the link shape
+            { strokeWidth: 2 },
+            new go.Binding("stroke", "color")),
+        $(go.Shape,  // the arrowhead
+            { toArrow: "Standard", stroke: null },
+            new go.Binding("fill", "color")),
+        $(go.Panel, "Vertical",  // panel to hold the text blocks
+            $(go.TextBlock,  // the text block for the name
+                {
+                    font: "bold 12px sans-serif",
+                    stroke: "#333",
+                    background: "white",
+                    textAlign: "center",
+                    margin: new go.Margin(0, 4, 4, 4)  // margin to create space between the text and the line
+                },
+                new go.Binding("text", "name")),
+            $(go.Shape, "LineH",  // horizontal line to separate the name and value
+                { stroke: "#333", strokeWidth: 1, height: 1, width: 50 }),
+            $(go.TextBlock,  // the text block for the value
+                {
+                    font: "bold 12px sans-serif",
+                    stroke: "#333",
+                    background: "white",
+                    textAlign: "center",
+                    margin: new go.Margin(4, 4, 0, 4)  // margin to create space between the line and the value
+                },
+                new go.Binding("text", "value"))
+        ),
+    );
 
 
     const groupTemplate = $(go.Group, "Vertical",
@@ -98,46 +110,45 @@ $(go.Panel, "Vertical",  // panel to hold the text blocks
                 { fill: "rgba(128,128,128,0.2)", stroke: "gray", strokeWidth: 3 }),
             $(go.Placeholder, { padding: 10 }))
     );
-    
+
 
     const mapNode: go.Map<string, go.Node> = new go.Map<string, go.Node>();
     mapNode.add("node", nodeTemplate);
     mapNode.add("mutex", mutex);
     const mapLink: go.Map<string, go.Link> = new go.Map<string, go.Link>();
-    mapLink.add("normalLink",linkTemplate);
-    mapLink.add("mutex",linkMutex);
+    mapLink.add("normalLink", linkTemplate);
+    mapLink.add("mutex", linkMutex);
     myDiagram.nodeTemplateMap = mapNode;
     myDiagram.linkTemplateMap = mapLink;
     myDiagram.groupTemplate = groupTemplate;
-    
+
     const nodeDataArray: NodeData[] = [];
 
     const linkDataArray: LinkData[] = [];
 
-    let sim = new Simulation(example);
+    let sim = new Simulation(simulationData);
 
 
     for (let activity in sim.getData().activities) {
-        nodeDataArray.push({ key: activity, text: `Activity ${activity}`,category:"node" })
+        nodeDataArray.push({ key: activity, text: `Activity ${activity}`, category: "node" })
     }
 
     for (let mutex of sim.getData().mutexes) {
         let key = JSON.stringify(mutex);
-        nodeDataArray.push({ key:JSON.stringify(mutex), text: `Mutex ${key}`, category: "mutex"});
+        nodeDataArray.push({ key: JSON.stringify(mutex), text: `Mutex ${key}`, category: "mutex" });
         for (let act of mutex) {
             nodeDataArray.find(s => s.key == act)!.group = key;
             console.log(nodeDataArray.find(s => s.key == act)!.group)
-            linkDataArray.push({ from: act, to: JSON.stringify(mutex), color: "black", category:"mutex" })
+            linkDataArray.push({ from: act, to: JSON.stringify(mutex), color: "black", category: "mutex" })
         }
 
-        
+
     }
 
     for (let sems of sim.getData().semaphores) {
         for (let from of sems.start) {
-            for (let to of sems.end) {
-                linkDataArray.push({ from, to, color: "black", name: `${from}-${to} `, value: sems.val, category:"normalLink"})
-            }
+            let to = sems.end;
+            linkDataArray.push({ from, to, color: "black", name: `${from}-${to} `, value: sems.val, category: "normalLink" })
         }
     }
 
@@ -151,8 +162,8 @@ $(go.Panel, "Vertical",  // panel to hold the text blocks
                 let to = changes[change].to
                 var data = myDiagram.model.findNodeDataForKey(act); // Finden Sie die Node-Daten mit dem Key 1
                 if (data) {
-                    myDiagram.model.setDataProperty(data, "color", to==0?"lightblue":"lime");
-                    myDiagram.model.setDataProperty(data, "text", to==0?`Activity ${act}`:`Activity ${act} - ${to}`);
+                    myDiagram.model.setDataProperty(data, "color", to == 0 ? "lightblue" : "lime");
+                    myDiagram.model.setDataProperty(data, "text", to == 0 ? `Activity ${act}` : `Activity ${act} - ${to}`);
                 }
             } else if (change.startsWith("semaphores")) {
                 let toSemVal = changes[change].to.val;
@@ -160,13 +171,11 @@ $(go.Panel, "Vertical",  // panel to hold the text blocks
 
                 let sems = sim.getData().semaphores[semidstr]
                 for (let from of sems.start) {
-                    for (let to of sems.end) {
-
-                        //@ts-ignore
-                        const link = myDiagram.model.linkDataArray.find(link => link.from === from && link.to === to);
-                        myDiagram.model.setDataProperty(link, "color", toSemVal==0?"black":"red");
-                        myDiagram.model.setDataProperty(link, "value", toSemVal);
-                    }
+                    let to = sems.end;
+                    //@ts-ignore
+                    const link = myDiagram.model.linkDataArray.find(link => link.from === from && link.to === to);
+                    myDiagram.model.setDataProperty(link, "color", toSemVal == 0 ? "black" : "red");
+                    myDiagram.model.setDataProperty(link, "value", toSemVal);
                 }
             }
         }
@@ -176,17 +185,17 @@ $(go.Panel, "Vertical",  // panel to hold the text blocks
 
     //Simulate init state
     {
-        for(let sems of sim.getData().semaphores){
+        for (let sems of sim.getData().semaphores) {
             let toSemVal = sems.val;
             for (let from of sems.start) {
                 for (let to of sems.end) {
                     //@ts-ignore
                     const link = myDiagram.model.linkDataArray.find(link => link.from === from && link.to === to);
-                    myDiagram.model.setDataProperty(link, "color", toSemVal==0?"black":"red");
+                    myDiagram.model.setDataProperty(link, "color", toSemVal == 0 ? "black" : "red");
                 }
             }
         }
-       
+
     }
 
     let changelog: any[] = [];
@@ -197,16 +206,25 @@ $(go.Panel, "Vertical",  // panel to hold the text blocks
         changelog.push(changes);
     };
 
-    
-    document.getElementById("save")!.onclick = () => {
-        let json = JSON.stringify({
-            example: example,
-            changelog
-        });
-        console.log("hi")
-        download("changes.json",json)
-    };
+
+    // document.getElementById("save")!.onclick = () => {
+    //     let json = JSON.stringify({
+    //         example: example,
+    //         changelog
+    //     });
+    //     console.log("hi")
+    //     download("changes.json", json)
+    // };
 
 }
 
-init();
+function reload() {
+    console.log("reload")
+    //@ts-ignore
+    let elem: HTMLTextAreaElement = document.getElementById("csv")!;
+    init(elem.value)
+    console.log("hi")
+}
+
+document.getElementById("reload")!.addEventListener("click", reload);
+reload();
