@@ -50,7 +50,7 @@ export type ColorOptions = {
     activityColor: ColorOption
 }
 
-export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsElementClickEventHandler, colors: ColorOption) {
+export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsElementClickEventHandler, colors: ColorOptions) {
     const $ = go.GraphObject.make;
     const myDiagram = $(go.Diagram, element, {
         "clickCreatingTool.archetypeNodeData": { text: "Node", color: "red" },
