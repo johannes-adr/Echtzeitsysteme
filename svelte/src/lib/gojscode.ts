@@ -15,19 +15,12 @@ interface NodeData {
 interface LinkData {
     from: string;
     to: string;
-    color: string;
+    color?: string;
     name?: string;
     value?: number;
     category: string;
-
 }
 
-interface GroupData {
-    key: number;
-    text: string;
-    color: string;
-    isGroup: boolean;
-}
 
 export type gojsElementClickEventHandler = (
    event: {typ: "mutex", mutexid: string} | {typ: "semaphore", from: string,to:string} | {typ: "activity", activitName: string}
@@ -53,7 +46,7 @@ export type ColorOptions = {
 export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsElementClickEventHandler, colors: ColorOptions) {
     const $ = go.GraphObject.make;
     const myDiagram = $(go.Diagram, element, {
-        "clickCreatingTool.archetypeNodeData": { text: "Node", color: "red" },
+        "clickCreatingTool.archetypeNodeData": { text: "Node", color: "white" },
         "commandHandler.archetypeGroupData": { text: "Group", isGroup: true, color: "blue" },
         "undoManager.isEnabled": true
     });
@@ -62,16 +55,30 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
     myDiagram.layout = $(go.ForceDirectedLayout);
 
     const nodeTemplate = $(go.Node, "Auto",
-        $(go.Shape, "RoundedRectangle", { fill: "lightblue" },
+        $(go.Shape, "RoundedRectangle", { fill: colors.activityColor.inactive.bg},
             new go.Binding("fill", "color")),
-        $(go.TextBlock, { margin: 4 },
-            new go.Binding("text", "text"))
+            $(go.TextBlock, 
+                { 
+                  margin: 4, 
+                  stroke: colors.activityColor.inactive.text // Standard-Textfarbe
+                },
+                // Binding für den Textinhalt
+                new go.Binding("text", "text"),
+                // Binding für die Textfarbe
+                new go.Binding("stroke", "textColor"))
     );
     const mutex: go.Node = $(
         go.Node, "Auto",
-        $(go.Shape, "Rectangle", { fill: "red" }),
-        $(go.TextBlock, { margin: 4 },
-            new go.Binding("text", "text"))
+        $(go.Shape, "Rectangle", { fill: colors.mutexColor.inactive.bg}),
+        $(go.TextBlock, 
+            { 
+              margin: 4, 
+              stroke: colors.mutexColor.inactive.text // Standard-Textfarbe
+            },
+            // Binding für den Textinhalt
+            new go.Binding("text", "text"),
+            // Binding für die Textfarbe
+            new go.Binding("stroke", "textColor"))
     );
     const linkMutex: go.Link = $(go.Link, // the whole link panel
         $(go.Shape, { strokeDashArray: [10, 5] }) // the link shape with dashed pattern
@@ -89,8 +96,8 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
             $(go.TextBlock,  // the text block for the name
                 {
                     font: "bold 12px sans-serif",
-                    stroke: "#333",
-                    background: "white",
+                    stroke: colors.semaphoreColor.inactive.text,
+                    background: colors.semaphoreColor.inactive.bg,
                     textAlign: "center",
                     margin: new go.Margin(0, 4, 4, 4)  // margin to create space between the text and the line
                 },
@@ -100,8 +107,8 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
             $(go.TextBlock,  // the text block for the value
                 {
                     font: "bold 12px sans-serif",
-                    stroke: "#333",
-                    background: "white",
+                    stroke: colors.semaphoreColor.inactive.text,
+                    background: colors.semaphoreColor.inactive.bg,
                     textAlign: "center",
                     margin: new go.Margin(4, 4, 0, 4)  // margin to create space between the line and the value
                 },
@@ -110,16 +117,6 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
     );
 
 
-    const groupTemplate = $(go.Group, "Vertical",
-        $(go.TextBlock,
-            { margin: 4, font: "bold 19px sans-serif", editable: true },
-            new go.Binding("text", "text"),
-            new go.Binding("stroke", "color")),
-        $(go.Panel, "Auto",
-            $(go.Shape, "Rectangle",
-                { fill: "rgba(128,128,128,0.2)", stroke: "gray", strokeWidth: 3 }),
-            $(go.Placeholder, { padding: 10 }))
-    );
 
 
     const mapNode: go.Map<string, go.Node> = new go.Map<string, go.Node>();
@@ -130,7 +127,6 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
     mapLink.add("mutex", linkMutex);
     myDiagram.nodeTemplateMap = mapNode;
     myDiagram.linkTemplateMap = mapLink;
-    myDiagram.groupTemplate = groupTemplate;
 
     myDiagram.addDiagramListener("ObjectSingleClicked", function(e: go.DiagramEvent) {
         const part = e.subject.part;
@@ -170,7 +166,7 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
         for (let sems of sim.getData().semaphores) {
             for (let from of sems.start) {
                 let to = sems.end;
-                linkDataArray.push({ from, to, color: "black", name: `${from}-${to} `, value: sems.val, category: "normalLink" })
+                linkDataArray.push({ from, to, name: `${from}-${to} `, value: sems.val, category: "normalLink" })
             }
         }
         myDiagram.model = new go.GraphLinksModel(nodeDataArray, linkDataArray);
@@ -183,7 +179,7 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
                     let to = sems.end;
                     //@ts-ignore
                     const link = myDiagram.model.linkDataArray.find(link => link.from === from && link.to === to);
-                    myDiagram.model.setDataProperty(link, "color", toSemVal == 0 ? "black" : "red");
+                    myDiagram.model.setDataProperty(link, "color", toSemVal == 0 ? colors.semaphoreColor.inactive.bg : colors.semaphoreColor.active.bg);
                 }
             }
 
@@ -191,7 +187,7 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
 
         sim.addObserver((c) => {
             console.log("change")
-            applyChanges(c, myDiagram, sim);
+            applyChanges(c, myDiagram, sim,colors);
         })
 
         return sim;
@@ -200,7 +196,7 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
 }
 
 
-function applyChanges(changes: any, myDiagram: go.Diagram, sim: Simulation) {
+function applyChanges(changes: any, myDiagram: go.Diagram, sim: Simulation, colors: ColorOptions) {
     console.dir(changes)
 
     for (let change in changes) {
@@ -209,7 +205,8 @@ function applyChanges(changes: any, myDiagram: go.Diagram, sim: Simulation) {
             let to = changes[change].to
             var data = myDiagram.model.findNodeDataForKey(act); // Finden Sie die Node-Daten mit dem Key 1
             if (data) {
-                myDiagram.model.setDataProperty(data, "color", to == 0 ? "lightblue" : "lime");
+                myDiagram.model.setDataProperty(data, "color", to == 0 ? colors.activityColor.inactive.bg : colors.activityColor.active.bg);
+                myDiagram.model.setDataProperty(data, "textColor", to == 0 ? colors.activityColor.inactive.text : colors.activityColor.active.text);
                 myDiagram.model.setDataProperty(data, "text", to == 0 ? `Activity ${act}` : `Activity ${act} - ${to}`);
             }
         } else if (change.startsWith("semaphores")) {
@@ -221,7 +218,7 @@ function applyChanges(changes: any, myDiagram: go.Diagram, sim: Simulation) {
                 let to = sems.end;
                 //@ts-ignore
                 const link = myDiagram.model.linkDataArray.find(link => link.from === from && link.to === to);
-                myDiagram.model.setDataProperty(link, "color", toSemVal == 0 ? "black" : "red");
+                myDiagram.model.setDataProperty(link, "color", toSemVal == 0 ? colors.semaphoreColor.inactive.bg : colors.semaphoreColor.active.bg);
                 myDiagram.model.setDataProperty(link, "value", toSemVal);
             }
         }
