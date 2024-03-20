@@ -30,13 +30,30 @@ interface GroupData {
 }
 
 export type gojsElementClickEventHandler = (
-   event: {typ: "mutex", mutexid: string} | {typ: "semaphore", semaphoreid: string} | {typ: "activity", activitName: string}
+   event: {typ: "mutex", mutexid: string} | {typ: "semaphore", from: string,to:string} | {typ: "activity", activitName: string}
 )=>void;
 
-export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsElementClickEventHandler) {
+export type ColorOption = {
+    active: {
+        bg: string,
+        text: string
+    },
+    inactive: {
+        bg: string,
+        text: string
+    }
+}
+
+export type ColorOptions = {
+    semaphoreColor: ColorOption,
+    mutexColor: ColorOption,
+    activityColor: ColorOption
+}
+
+export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsElementClickEventHandler, colors: ColorOption) {
     const $ = go.GraphObject.make;
     const myDiagram = $(go.Diagram, element, {
-        "clickCreatingTool.archetypeNodeData": { text: "Node", color: "white" },
+        "clickCreatingTool.archetypeNodeData": { text: "Node", color: "red" },
         "commandHandler.archetypeGroupData": { text: "Group", isGroup: true, color: "blue" },
         "undoManager.isEnabled": true
     });
@@ -115,6 +132,21 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
     myDiagram.linkTemplateMap = mapLink;
     myDiagram.groupTemplate = groupTemplate;
 
+    myDiagram.addDiagramListener("ObjectSingleClicked", function(e: go.DiagramEvent) {
+        const part = e.subject.part;
+        if (part instanceof go.Node) { // Überprüfen, ob das geklickte Objekt ein Node ist
+            const data = part.data;
+            if (data.category === "mutex") {
+                cb({typ: "mutex", mutexid: data.key});
+            } else if (data.category === "node") {
+                cb({typ: "activity", activitName: data.key});
+            }
+        }
+        if (part instanceof go.Link) {
+            const data = part.data;
+            cb({typ: "semaphore", from: data.from, to: data.to});
+        }
+      });
     function reload() {
         const nodeDataArray: NodeData[] = [];
         const linkDataArray: LinkData[] = [];

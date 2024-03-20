@@ -8,7 +8,7 @@
 
 
     let handler: gojsElementClickEventHandler = (ev)=>{
-
+        console.log(ev)
     }
 
     onMount(()=>{
