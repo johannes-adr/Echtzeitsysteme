@@ -84,7 +84,16 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
     const linkMutex: go.Link = $(go.Link, // the whole link panel
         $(go.Shape, { strokeDashArray: [10, 5] }) // the link shape with dashed pattern
     );
+    const orLink = $(go.Link,  // the whole link panel
+    { toShortLength: 3, relinkableFrom: true, relinkableTo: true },
+    $(go.Shape,  // the link shape
+        { strokeWidth: 2 },
+        new go.Binding("stroke", "color"))
+    );
 
+    const VirtualNode: go.Node = $(go.Node, "Position", 
+    { visible: true },  // Mach die virtuelle Node unsichtbar
+  );
     const linkTemplate = $(go.Link,  // the whole link panel
         { toShortLength: 3, relinkableFrom: true, relinkableTo: true },
         $(go.Shape,  // the link shape
@@ -123,9 +132,11 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
     const mapNode: go.Map<string, go.Node> = new go.Map<string, go.Node>();
     mapNode.add("node", nodeTemplate);
     mapNode.add("mutex", mutex);
+    mapNode.add("VirtualNode", VirtualNode);
     const mapLink: go.Map<string, go.Link> = new go.Map<string, go.Link>();
     mapLink.add("normalLink", linkTemplate);
     mapLink.add("mutex", linkMutex);
+    mapLink.add("orLink", orLink);
     myDiagram.nodeTemplateMap = mapNode;
     myDiagram.linkTemplateMap = mapLink;
 
@@ -144,10 +155,10 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
             cb({typ: "semaphore", from: data.from, to: data.to});
         }
       });
-    function reload() {
+
+    function setSimulation(sim: Simulation) {
         const nodeDataArray: NodeData[] = [];
         const linkDataArray: LinkData[] = [];
-        let sim = new Simulation(data);
         for (let activity in sim.getData().activities) {
             nodeDataArray.push({ key: activity, text: `Activity ${activity}`, category: "node" })
         }
@@ -160,27 +171,56 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
                 console.log(nodeDataArray.find(s => s.key == act)!.group)
                 linkDataArray.push({ from: act, to: JSON.stringify(mutex), color: "black", category: "mutex" })
             }
-
-
         }
-
         for (let sems of sim.getData().semaphores) {
+            let key = { from: sems.start, to: sems.end };
+            if(sems.start.length > 1){
+                nodeDataArray.push({ key: JSON.stringify(key), text: '', category: "VirtualNode"});
+            }
             for (let from of sems.start) {
                 let to = sems.end;
-                linkDataArray.push({ from, to, name: `${from}-${to} `, value: sems.val, category: "normalLink" })
+                if(sems.start.length == 1){
+                    linkDataArray.push({ from, to, name: `${from}-${to} `, value: sems.val, category: "normalLink" })
+                }else{
+                    linkDataArray.push({from,to:JSON.stringify(key), name: `${from}-${to}`, value: sems.val, category: "orLink" })
+                }
             }
-        }
+            if (sems.start.length > 1){
+                linkDataArray.push({ from: JSON.stringify(key), to: sems.end, color: colors.semaphoreColor.inactive.bg,value:sems.val, category: "normalLink" })
+                console.log(linkDataArray,nodeDataArray)
+            }
+            
+    }
         myDiagram.model = new go.GraphLinksModel(nodeDataArray, linkDataArray);
 
         //Simulate init state
         {
             for (let sems of sim.getData().semaphores) {
+                if(sems.start.length == 1){
                 let toSemVal = sems.val;
-                for (let from of sems.start) {
+                let to = sems.end;
+                let from = sems.start[0];
+                //@ts-ignore
+                const links = myDiagram.model.linkDataArray.find(link => link.from === from && link.to === to);
+                myDiagram.model.setDataProperty(links, "color", toSemVal == 0 ? colors.semaphoreColor.inactive.bg : colors.semaphoreColor.active.bg);
+                }
+                if(sems.start.length > 1){
+                    let toSemVal = sems.val;
                     let to = sems.end;
-                    //@ts-ignore
-                    const link = myDiagram.model.linkDataArray.find(link => link.from === from && link.to === to);
-                    myDiagram.model.setDataProperty(link, "color", toSemVal == 0 ? colors.semaphoreColor.inactive.bg : colors.semaphoreColor.active.bg);
+                    let keyNode:string = 'null';
+                    for (let from of sems.start) {
+                    
+                        console.log(from+'-'+to)
+                        //@ts-ignore
+                        const link = myDiagram.model.linkDataArray.find(link => link.name === from+'-'+to);
+                        myDiagram.model.setDataProperty(link, "color", toSemVal == 0 ? colors.semaphoreColor.inactive.bg : colors.semaphoreColor.active.bg);
+                        keyNode = link.to;
+                    }
+                     
+                    console.log()
+                    // @ts-ignore
+                    const finalLink = myDiagram.model.linkDataArray.find(link => link.from === keyNode && link.to === sems.end);
+                    myDiagram.model.setDataProperty(finalLink, "color", toSemVal == 0 ? colors.semaphoreColor.inactive.bg : colors.semaphoreColor.active.bg);
                 }
             }
 
@@ -193,7 +233,7 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
 
         return sim;
     }
-    return reload
+    return setSimulation;
 }
 
 
