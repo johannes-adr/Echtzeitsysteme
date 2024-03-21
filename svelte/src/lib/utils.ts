@@ -26,6 +26,10 @@ export function extractChanges(obj1: any, obj2: any): any {
 export function removeSameProps(obj1: any, obj2: any){
     const isObject = (obj: any) => obj && typeof obj === 'object' && !Array.isArray(obj);
 
+    if(!isObject(obj1) || !isObject(obj2)){
+        return;
+    }
+
     let obj1cpy = JSON.parse(JSON.stringify(obj1));
     for(let key in obj1){
         if(key in obj2){

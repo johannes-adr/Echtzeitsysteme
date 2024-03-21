@@ -51,16 +51,24 @@ type Observer = (changes: Record<string, any>) => void;
 
 
 export class Simulation {
-    private blueprint: SimulationData;
     private observers: Observer[] = [];
+
+    //@ts-ignore
+    private blueprint: SimulationData;
+      //@ts-ignore
     private prevState: SimulationData;
+      //@ts-ignore
     private front: SimulationData;
     constructor(front: SimulationData) {
-        this.blueprint = front
-        this.front = JSON.parse(JSON.stringify(front)) as SimulationData;
-        this.prevState = JSON.parse(JSON.stringify(front)) as SimulationData;
+        this.loadData(front)
+    }
 
-        for (let key in front.activities) {
+    loadData(data: SimulationData){
+        this.blueprint = data
+        this.front = JSON.parse(JSON.stringify(data)) as SimulationData;
+        if(!this.prevState)this.prevState = JSON.parse(JSON.stringify(data)) as SimulationData;
+
+        for (let key in data.activities) {
             this.front.activities[key] = 0;
         }
     }
@@ -125,6 +133,11 @@ export class Simulation {
         return this.front.semaphores.filter(s =>
             s.start.includes(act)
         )
+    }
+
+    setState(state: SimulationData){
+        this.prevState = this.front;
+        this.front = state
     }
 
     doCycle() {

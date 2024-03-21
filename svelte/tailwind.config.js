@@ -5,7 +5,7 @@ export default {
     extend: {},
   },
   daisyui: {
-    themes: ["light", "dark", "valentine", {
+    themes: ["light", "dark", "dracula","dim","black", {
       "memories":{
          "primary":"#9b59b6",
          "primary-content": "#fff",
