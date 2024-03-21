@@ -41,8 +41,8 @@ export const DarkTheme:ColorOptions ={
             text: "#fff"
         },
         inactive: {
-            bg: "#222",
-            text: "#aaa"
+            bg: "#888",
+            text: "#fff"
         }
     },
     mutexColor: {
