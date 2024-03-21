@@ -23,7 +23,7 @@
     } else {
         localStorage.removeItem("activeFile");
     }
-    let files: { [name: string]: { changed: boolean; content: string } } = {};
+    export let files: { [name: string]: { changed: boolean; content: string } } = {};
 
     function loadFilesFromStorage() {
         files = {};
