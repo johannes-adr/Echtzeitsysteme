@@ -1,13 +1,15 @@
 <script lang="ts">
-    export let activeFile: string | null;
+    import { activeFile,deleteFile,files, saveFile } from "$lib/files";
+
     export let fname: string;
-    export let changed: boolean;
     let fnameold = fname;
-    export let deleteFile: (fname: string) => void;
-    export let saveFile: (fname: string) => void;
+
+    let changed: boolean = false;
+    let editName = false;
+
+
     let input: HTMLInputElement;
 
-    let editName = false;
 
     export let onRename: (fname_old: string, fname_new: string) => void;
     $: {
@@ -17,8 +19,8 @@
         }
     }
 
-
-    $:setTimeout(()=>{if(editName)resizeInput();input.focus()},0)
+    $:changed = $files[fname]?.changed ?? false;
+    $:setTimeout(()=>{if(editName){resizeInput();input.focus()}},0)
 
     function getWidthOfInput() {
         var tmp = document.createElement("span");
@@ -42,7 +44,7 @@
 
 <button
     class="text-left pt-0.5 py-1 px-1 w-full flex flex-row rounded-l justify-between items-center"
-    on:click={() => (activeFile = fname)}
+    on:click={() => ($activeFile = fname)}
 >
     <div class="flex flex-row items-center">
         <span class="material-symbols-outlined font-thin"> description </span>

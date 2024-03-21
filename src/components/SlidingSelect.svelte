@@ -1,5 +1,6 @@
 <script lang="ts">
     import { browser } from "$app/environment";
+    import { onMount } from "svelte";
     import type { Writable } from "svelte/store";
     let tabsContainer: HTMLElement;
     export let tabs: string[];
@@ -13,11 +14,14 @@
         console.log("resize")
     }
 
+    onMount(()=>{
+        resize();
+    })
+
     if(browser)window.addEventListener("resize",resize);
     $: {
         activeTab;
-        if (tabsContainer && browser)resize()
-           
+        if (browser && tabsContainer)resize()
     }
 </script>
 

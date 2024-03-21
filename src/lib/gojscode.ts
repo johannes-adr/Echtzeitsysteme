@@ -156,9 +156,10 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
         }
       });
 
-    function setSimulation(sim: Simulation) {
+    function reload(data_loc: SimulationData = data) {
         const nodeDataArray: NodeData[] = [];
         const linkDataArray: LinkData[] = [];
+        let sim = new Simulation(data_loc);
         for (let activity in sim.getData().activities) {
             nodeDataArray.push({ key: activity, text: `Activity ${activity}`, category: "node" })
         }
@@ -233,7 +234,7 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
 
         return sim;
     }
-    return setSimulation;
+    return reload;
 }
 
 
