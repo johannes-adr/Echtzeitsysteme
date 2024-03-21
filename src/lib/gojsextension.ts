@@ -10,9 +10,10 @@ export function applyChanges(changes: any, myDiagram: go.Diagram, sim: Simulatio
             let to = changes[change].to
             var data = myDiagram.model.findNodeDataForKey(act); // Finden Sie die Node-Daten mit dem Key 1
             if (data) {
-                myDiagram.model.setDataProperty(data, "color", to == 0 ? colors.activityColor.inactive.bg : colors.activityColor.active.bg);
+                myDiagram.model.setDataProperty(data, "backgroundColor", to == 0 ? colors.activityColor.inactive.bg : colors.activityColor.active.bg);
                 myDiagram.model.setDataProperty(data, "textColor", to == 0 ? colors.activityColor.inactive.text : colors.activityColor.active.text);
-                myDiagram.model.setDataProperty(data, "text", to == 0 ? `Activity ${act}` : `Activity ${act} - ${to}`);
+                console.log('Debug :'+act,to)
+                myDiagram.model.setDataProperty(data, "Cycles", to == 0 ? `` : `Cycles: ${to}`);
             }
         } else if (change.startsWith("semaphores")) {
             let toSemVal = changes[change].to.val;

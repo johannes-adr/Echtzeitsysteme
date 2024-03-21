@@ -5,12 +5,18 @@ import { parseCSV, type SimulationData } from "./nodes";
 import { applyChanges } from "./gojsextension";
 interface NodeData {
     key: string;
-    text: string;
+    text?: string;
     color?: string;
     parent?: string;
     group?: string;
     isGroup?: boolean
     category: string;
+    backgroundColor?: string;
+    borderColor?: string;
+    textColor?: string;
+    mainText?: string;
+    subText?: string;
+    Cycles?: string;
 }
 
 interface LinkData {
@@ -56,18 +62,47 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
     myDiagram.layout = $(go.ForceDirectedLayout);
 
     const nodeTemplate = $(go.Node, "Auto",
-        $(go.Shape, "RoundedRectangle", { fill: colors.activityColor.inactive.bg},
-            new go.Binding("fill", "color")),
-            $(go.TextBlock, 
-                { 
-                  margin: 4, 
-                  stroke: colors.activityColor.inactive.text // Standard-Textfarbe
-                },
-                // Binding für den Textinhalt
-                new go.Binding("text", "text"),
-                // Binding für die Textfarbe
-                new go.Binding("stroke", "textColor"))
-    );
+    { desiredSize: new go.Size(150, 100) }, // Setzt die feste Größe der Node
+    $(go.Shape, "RoundedRectangle",
+      new go.Binding("fill", "backgroundColor"), // Bindung für die allgemeine Hintergrundfarbe
+    ),
+    $(go.Panel, "Vertical", 
+      // Panel, das die TextBlöcke vertikal anordnet
+      { margin: 4 },
+      $(go.TextBlock,
+        {
+          margin: 4, 
+          font: "18px sans-serif", // Schriftgröße für den Haupttext
+          wrap: go.TextBlock.WrapFit,
+          textAlign: "center"
+        },
+        new go.Binding("text", "mainText"), // Binding für den Haupttext
+        new go.Binding("stroke", "textColor") // Bindung für die Textfarbe
+      ),
+      $(go.TextBlock,
+        {
+          margin: 4, 
+          font: "12px sans-serif", // Schriftgröße für den mittleren Text
+          wrap: go.TextBlock.WrapFit,
+          textAlign: "center"
+        },
+        new go.Binding("text", "subText"), // Binding für den Untertext
+        new go.Binding("stroke", "textColor") // Gleiche Bindung für die Textfarbe wie oben
+      ),
+      $(go.TextBlock,  // Hinzufügen eines dritten TextBlocks
+        {
+          margin: 4, 
+          font: "11px sans-serif", // Schriftgröße für den untersten Text
+          wrap: go.TextBlock.WrapFit,
+          textAlign: "center"
+        },
+        new go.Binding("text", "Cycles"), // Binding für den zusätzlichen Text
+        new go.Binding("stroke", "textColor") // Gleiche Bindung für die Textfarbe
+      )
+    )
+  );
+  
+  
     const mutex: go.Node = $(
         go.Node, "Auto",
         $(go.Shape, "Rectangle", { fill: colors.mutexColor.inactive.bg}),
@@ -160,8 +195,13 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
         const nodeDataArray: NodeData[] = [];
         const linkDataArray: LinkData[] = [];
         let sim = new Simulation(data_loc);
+        
         for (let activity in sim.getData().activities) {
-            nodeDataArray.push({ key: activity, text: `Activity ${activity}`, category: "node" })
+            const parts = activity.split('_');
+            const Activity = parts.shift()!; // Entfernt und gibt den ersten Teil zurück
+            const Task = parts.pop()!; // Entfernt und gibt den letzten Teil zurück
+  
+            nodeDataArray.push({ key: activity, subText: `Activity ${Activity}`,mainText:`Task ${Task} `, category: "node" , backgroundColor: colors.activityColor.inactive.bg, textColor: colors.activityColor.inactive.text,Cycles:" "});
         }
 
         for (let mutex of sim.getData().mutexes) {
