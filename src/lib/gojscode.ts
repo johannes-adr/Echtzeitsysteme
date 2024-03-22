@@ -62,7 +62,7 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
     myDiagram.layout = $(go.ForceDirectedLayout);
 
     const nodeTemplate = $(go.Node, "Auto",
-    { desiredSize: new go.Size(150, 100) }, // Setzt die feste Größe der Node
+    { desiredSize: new go.Size(100, 75) }, // Setzt die feste Größe der Node
     $(go.Shape, "RoundedRectangle",
       new go.Binding("fill", "backgroundColor"), // Bindung für die allgemeine Hintergrundfarbe
     ),
