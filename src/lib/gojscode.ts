@@ -26,6 +26,7 @@ interface LinkData {
     name?: string;
     value?: number;
     category: string;
+    taskArrow?: string;
 }
 
 
@@ -135,14 +136,15 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
             { strokeWidth: 2 },
             new go.Binding("stroke", "color")),
         $(go.Shape,  // the arrowhead
-            { toArrow: "Standard", stroke: null },
-            new go.Binding("fill", "color")),
+            { toArrow: "OpenTriangle", stroke: null },
+            new go.Binding("fill", "color"),
+            new go.Binding("toArrow", "taskArrow")),
         $(go.Panel, "Vertical",  // panel to hold the text blocks
             $(go.TextBlock,  // the text block for the name
                 {
                     font: "bold 12px sans-serif",
                     stroke: colors.semaphoreColor.inactive.text,
-                    background: colors.semaphoreColor.inactive.bg,
+                    background: "transparent",
                     textAlign: "center",
                     margin: new go.Margin(0, 4, 4, 4)  // margin to create space between the text and the line
                 },
@@ -153,7 +155,7 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
                 {
                     font: "bold 12px sans-serif",
                     stroke: colors.semaphoreColor.inactive.text,
-                    background: colors.semaphoreColor.inactive.bg,
+                    background: "transparent",
                     textAlign: "center",
                     margin: new go.Margin(4, 4, 0, 4)  // margin to create space between the line and the value
                 },
@@ -190,7 +192,6 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
             cb({typ: "semaphore", from: data.from, to: data.to});
         }
       });
-
     function reload(data_loc: SimulationData = data) {
         const nodeDataArray: NodeData[] = [];
         const linkDataArray: LinkData[] = [];
@@ -200,7 +201,6 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
             const parts = activity.split('_');
             const Activity = parts.shift()!; // Entfernt und gibt den ersten Teil zurück
             const Task = parts.pop()!; // Entfernt und gibt den letzten Teil zurück
-  
             nodeDataArray.push({ key: activity, subText: `Activity ${Activity}`,mainText:`Task ${Task} `, category: "node" , backgroundColor: colors.activityColor.inactive.bg, textColor: colors.activityColor.inactive.text,Cycles:" "});
         }
 
@@ -220,8 +220,19 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
             }
             for (let from of sems.start) {
                 let to = sems.end;
+                const partsfrom = from.split('_');
+                const Taskfrom = partsfrom.pop()!; // Entfernt und gibt den letzten Teil zurück
+                const partto = to.split('_')
+                const Taskto = partto.pop()
+                console.log("to:",Taskto, "from: ", Taskfrom)
                 if(sems.start.length == 1){
-                    linkDataArray.push({ from, to, name: `${from}-${to} `, value: sems.val, category: "normalLink" })
+                    if(Taskfrom == Taskto){
+                        linkDataArray.push({ from, to, name: `${from}-${to} `, value: sems.val, category: "normalLink",taskArrow:"" })
+                    
+                    }else{
+                        linkDataArray.push({ from, to, name: `${from}-${to} `, value: sems.val, category: "normalLink",taskArrow:"" })
+                    }
+                    
                 }else{
                     linkDataArray.push({from,to:JSON.stringify(key), name: `${from}-${to}`, value: sems.val, category: "orLink" })
                 }
