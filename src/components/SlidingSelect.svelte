@@ -1,7 +1,6 @@
 <script lang="ts">
     import { browser } from "$app/environment";
     import { onMount } from "svelte";
-    import type { Writable } from "svelte/store";
     let tabsContainer: HTMLElement;
     export let tabs: string[];
     export let activeTab: number; // the currently selected tab
@@ -11,7 +10,6 @@
         let loc = tabsContainer.children[activeTab] as HTMLElement;
         offsetWidth = loc.offsetWidth;
         offsetLeft = loc.offsetLeft
-        console.log("resize")
     }
 
     onMount(()=>{

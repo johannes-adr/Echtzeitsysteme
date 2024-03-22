@@ -2,8 +2,7 @@
     import { activeFile, createFile, files, localSname } from "$lib/files";
     import { parseCSV, type SimulationData } from "$lib/nodes";
     import FileItem from "./FileItem.svelte";
-
-    if (
+    $: if (
         $activeFile !== null &&
         localStorage.getItem(localSname($activeFile)) == undefined
     ) {
@@ -19,7 +18,7 @@
 
     
     $: {
-        if ($activeFile) {
+        if ($activeFile && localStorage) {
             if (
                 $files[$activeFile].content !== localStorage.getItem(localSname($activeFile))
             ) {
