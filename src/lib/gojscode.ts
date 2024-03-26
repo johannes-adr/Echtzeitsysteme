@@ -29,9 +29,9 @@ interface LinkData {
     taskArrow?: string;
 }
 
-
+export type gojsClickEvent = {typ: "mutex", mutexid: string} | {typ: "semaphore", from: string,to:string} | {typ: "activity", activitName: string};
 export type gojsElementClickEventHandler = (
-   event: {typ: "mutex", mutexid: string} | {typ: "semaphore", from: string,to:string} | {typ: "activity", activitName: string}
+   event: gojsClickEvent
 )=>void;
 
 export type ColorOption = {

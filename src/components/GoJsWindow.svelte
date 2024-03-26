@@ -1,6 +1,6 @@
 <script lang="ts">
     import { DarkTheme } from "$lib/colorthemes";
-    import { activeTab, sim } from "$lib/global";
+    import { activeTab, goJsElementClickHandlers, sim } from "$lib/global";
     import { activeFile, files } from "$lib/files";
     import { initGo, type gojsElementClickEventHandler } from "$lib/gojscode";
     import { parseCSV, type SimulationData } from "$lib/nodes";
@@ -12,8 +12,8 @@
     let root: HTMLDivElement;
 
     let handler: gojsElementClickEventHandler = (ev) => {
-        console.log(ev);
         activeTab.set("Viewer");
+        setTimeout(()=>Object.values(goJsElementClickHandlers).forEach(cb=>cb(ev)),10)
     };
     let reload: (sim?: SimulationData)=>Simulation;
     onMount(()=>{
