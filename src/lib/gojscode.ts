@@ -227,10 +227,10 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
                 console.log("to:",Taskto, "from: ", Taskfrom)
                 if(sems.start.length == 1){
                     if(Taskfrom == Taskto){
-                        linkDataArray.push({ from, to, name: `${from}-${to} `, value: sems.val, category: "normalLink",taskArrow:"" })
+                        linkDataArray.push({ from, to, name: `${from}-${to} `, value: sems.val, category: "normalLink",taskArrow:"Chevron" })
                     
                     }else{
-                        linkDataArray.push({ from, to, name: `${from}-${to} `, value: sems.val, category: "normalLink",taskArrow:"" })
+                        linkDataArray.push({ from, to, name: `${from}-${to} `, value: sems.val, category: "normalLink",taskArrow:"Standard" })
                     }
                     
                 }else{
