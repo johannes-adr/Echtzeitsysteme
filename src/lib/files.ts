@@ -1,11 +1,15 @@
 import { get, writable } from "svelte/store";
 import { EXAMPLE_CSV } from "./simulation";
 import { browser } from "$app/environment";
+import { parseCSV, type SimulationData } from "./nodes";
 
 
 
 export let activeFile = writable<string | null>(browser?localStorage.getItem("activeFile"):null);
+export let activeParseContent = writable<undefined | SimulationData>();
 export let files = writable<{ [name: string]: { changed: boolean; content: string } }>({});
+
+
 
 
 const snameprefix = "csv_file/";
@@ -38,6 +42,15 @@ export function loadFilesFromStorage() {
 }
 if(browser)loadFilesFromStorage();
 
+activeFile.subscribe(activeFile=>{
+    let filesl = get(files)
+    if(activeFile && filesl && activeFile in filesl){
+        let content = filesl[activeFile].content;
+        activeParseContent.set(parseCSV(content))
+    }else{
+        activeParseContent.set(undefined)
+    }
+})
 
 
 export function saveFile(fname: string, files_loc = get(files)) {

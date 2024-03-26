@@ -1,7 +1,7 @@
 <script lang="ts">
     import { DarkTheme } from "$lib/colorthemes";
     import { activeTab, goJsElementClickHandlers, sim } from "$lib/global";
-    import { activeFile, files } from "$lib/files";
+    import { activeFile, activeParseContent, files } from "$lib/files";
     import { initGo, type gojsElementClickEventHandler } from "$lib/gojscode";
     import { parseCSV, type SimulationData } from "$lib/nodes";
     import { EXAMPLE_CSV, Simulation } from "$lib/simulation";
@@ -17,15 +17,14 @@
     };
     let reload: (sim?: SimulationData)=>Simulation;
     onMount(()=>{
-        activeFile.subscribe(activeFile=>{
-        if(activeFile){
-            let content = get(files)[activeFile].content;
+        activeParseContent.subscribe(content=>{
+        if(content){
             let simg = get(sim);
             if(simg === undefined){
-                reload = initGo(parseCSV(content), root, handler, DarkTheme)
+                reload = initGo(content, root, handler, DarkTheme)
                 sim.set(reload())
             }else{
-                sim.set(reload(parseCSV(content)));
+                sim.set(reload(content));
             }
         }
     })

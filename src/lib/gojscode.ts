@@ -283,6 +283,15 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
             applyChanges(c, myDiagram, sim,colors);
         })
 
+        setTimeout(()=>{
+            let bounds = myDiagram.documentBounds.copy();
+            bounds.bottom = 0;
+            let padding = 50; // Adjust padding as needed
+            bounds.inflate(padding, padding);
+        
+            // Zoom to the new padded bounds
+            myDiagram.zoomToRect(bounds);
+        },0);
         return sim;
     }
     return reload;

@@ -1,5 +1,10 @@
+<script context="module" lang="ts">
+    export let autoCycleInterval: NodeJS.Timeout | undefined;
+</script>
+
 <script lang="ts">
     import { sim } from "$lib/global";
+    import { onDestroy } from "svelte";
     import { get } from "svelte/store";
     let changeHistory: any[] = [];
     sim.subscribe((sim) => {
@@ -11,15 +16,15 @@
             changeHistory = changeHistory;
         });
     });
-    let autoCycle = false;
+    let autoCycle = autoCycleInterval !== undefined;
     let interval = "1000";
 
-    let autoCycleInterval: NodeJS.Timeout | undefined;
 
     $: {
         console.log(autoCycle);
         if (autoCycleInterval !== undefined) {
             clearInterval(autoCycleInterval);
+            autoCycleInterval = undefined;
         }
 
         if (autoCycle) {
@@ -28,6 +33,10 @@
             }, Number.parseInt(interval));
         }
     }
+
+    // onDestroy(()=>{
+    //     if(autoCycleInterval !== undefined)clearInterval(autoCycleInterval);
+    // })
 </script>
 
 <div class="w-full h-full p-3">
