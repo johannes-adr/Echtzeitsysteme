@@ -38,11 +38,11 @@ export const DarkTheme:ColorOptions ={
     semaphoreColor: {
         active: {
             bg: "#900",
-            text: "#fff"
+            text: "#2980b9"
         },
         inactive: {
             bg: "#888",
-            text: "#fff"
+            text: "#2980b9"
         }
     },
     mutexColor: {
