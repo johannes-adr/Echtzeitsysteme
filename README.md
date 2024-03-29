@@ -19,6 +19,7 @@ Das System besteht aus Aktivitäten und Tasks, wobei Tasks aus mehreren Aktivit�
 - Erstellen, Löschen und Verwalten von Dateien direkt im Browser
 - Persistenz von Dateien selbst nach Neustart der Anwendung
 - Automatischer Ablauf von Tasks
+- Geschwindigkeit des automatsichen Ablaufs 
 - Möglichkeit, Schritte zurückzugehen
 - Historie-Tab zur Anzeige vergangener Zustände
 - Viewer-Tab zur detaillierten Anzeige des aktuellen Systemzustands
@@ -28,25 +29,24 @@ Das System besteht aus Aktivitäten und Tasks, wobei Tasks aus mehreren Aktivit�
 
 1. Klonen Sie das Repository auf Ihren lokalen Rechner.
 2. Führen Sie `npm install` aus, um die erforderlichen Abhängigkeiten zu installieren.
-3. Starten Sie die Anwendung mit `npm start`.
-4. Öffnen Sie Ihren Webbrowser und navigieren Sie zu `http://localhost:3000`.
+3. Starten Sie die Anwendung mit `npm start dev`.
+4. Öffnen Sie Ihren Webbrowser und navigieren Sie zu `http://localhost:5173/`.
 
 ## Beispiel Datei 
 
-'# Activity, activity_task, Duration
-
+Activity, activity_task, Duration
 Activity, a_1, 1
 Activity, a_2, 1
 Activity, a_3, 1
 
 
-'# Semaphore, Wert, Endwert, Startwert +,
+Semaphore, Wert, Endwert, Startwert +,
 Semaphore, 0, a_1, a_2
 Semaphore, 0, a_2, a_3, a_1
 Semaphore, 0, a_3, a_1
 
 
-'# Mutex, Prioritäten Aktivitäten
+Mutex, Prioritäten Aktivitäten
 Mutex, a_1,a_2,a_3
 
 ## Lizenz
