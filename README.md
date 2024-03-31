@@ -8,7 +8,7 @@ Das System besteht aus Aktivit채ten und Tasks, wobei Tasks aus mehreren Aktivit�
 
 ## Features
 
-- Simulation von Echtzeitsystemen mit der Verwendung von Semaphoren und Mutexen
+- Simulation von Echtzeitsystemen mit der Verwendung von Semaphoren und Mutexenn
 - Priorit채tsliste f체r Mutexe oder Priorit채tsvererbung
 - Benutzerdefinierte Namen und Werte f체r Semaphoren
 - Unterst체tzung f체r AND- und OR-Semaphoren
