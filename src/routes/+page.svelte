@@ -30,7 +30,7 @@
 
 
 <div class="flex flex-row h-full w-full gap-5 p-5">
-    <Gojswindow></Gojswindow>
+    <Gojswindow />
 
     <div class="bg-base-300 controlWindow flex-grow flex flex-col rounded-xl overflow-hidden">
         <div class="bg-base-200 p-1 shadow-md z-10 w-full min-w-fit">

@@ -12,7 +12,6 @@ export function applyChanges(changes: any, myDiagram: go.Diagram, sim: Simulatio
             if (data) {
                 myDiagram.model.setDataProperty(data, "backgroundColor", to == 0 ? colors.activityColor.inactive.bg : colors.activityColor.active.bg);
                 myDiagram.model.setDataProperty(data, "textColor", to == 0 ? colors.activityColor.inactive.text : colors.activityColor.active.text);
-                console.log('Debug :'+act,to)
                 myDiagram.model.setDataProperty(data, "Cycles", to == 0 ? `` : `Cycles: ${to}`);
             }
         } else if (change.startsWith("semaphores")) {
@@ -23,12 +22,9 @@ export function applyChanges(changes: any, myDiagram: go.Diagram, sim: Simulatio
 
             if(sems.start.length==1){
                 let to = sems.end;
-                console.log(sems.start.length)
-                console.log(sems.start, to)
                 let from = sems.start[0];
                 //@ts-ignore
                 const link = myDiagram.model.linkDataArray.find(link => link.from === from && link.to === to);
-                console.log(link)
                 myDiagram.model.setDataProperty(link, "color", toSemVal == 0 ? colors.semaphoreColor.inactive.bg : colors.semaphoreColor.active.bg);
                 myDiagram.model.setDataProperty(link, "value", toSemVal);
             }else{
@@ -42,7 +38,6 @@ export function applyChanges(changes: any, myDiagram: go.Diagram, sim: Simulatio
                     keyNode = link.to;
 
                 }
-                console.log(keyNode)
                 //@ts-ignore
                 const finalLink = myDiagram.model.linkDataArray.find(link => link.from === keyNode && link.to === sems.end);
                 myDiagram.model.setDataProperty(finalLink, "color", toSemVal == 0 ? colors.semaphoreColor.inactive.bg : colors.semaphoreColor.active.bg);
