@@ -147,9 +147,18 @@ export class Simulation {
 
         activityLoop:
         for (let act in this.front.activities) {
+            let mutex = this.front.mutexes.find(m => m.includes(act));
+
+            if (mutex) for (let actNameInMutex of mutex) {
+                if (actNameInMutex == act) break;
+                if (this.front.activities[actNameInMutex] != 0) {
+                    continue activityLoop;
+                }
+            }
+
+
             let val = this.front.activities[act];
             if (val > 0) {
-               
                 doLater.set(`dec act ${act}`, () => {
                     this.front.activities[act]--;
                     //If task is now 0, start other semaphores
@@ -161,15 +170,6 @@ export class Simulation {
                     }
                 })
             } else {
-                let mutex = this.front.mutexes.find(m => m.includes(act));
-
-                if (mutex) for (let actNameInMutex of mutex) {
-                    if (actNameInMutex == act) break;
-                    if (this.front.activities[actNameInMutex] != 0) {
-                        continue activityLoop;
-                    }
-                }
-
                 let sems = this.front.semaphores.filter(s => s.end == act);
                 let isReady = sems.find(sem => sem.val == 0) == undefined;
 
