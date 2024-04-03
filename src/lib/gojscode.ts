@@ -24,7 +24,7 @@ interface LinkData {
     to: string;
     color?: string;
     name?: string;
-    value?: number;
+    value?: any;
     category: string;
     taskArrow?: string;
 }
@@ -53,6 +53,7 @@ export type ColorOptions = {
 
 export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsElementClickEventHandler, colors: ColorOptions) {
     const $ = go.GraphObject.make;
+    let showNameLink = true;
     const myDiagram = $(go.Diagram, element, {
         "clickCreatingTool.archetypeNodeData": { text: "Node", color: "white" },
         "commandHandler.archetypeGroupData": { text: "Group", isGroup: true, color: "blue" },
@@ -123,7 +124,7 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
     const orLink = $(go.Link,
     { },
     $(go.Shape,
-        {strokeWidth: 2},
+        {strokeWidth: 3},
         new go.Binding("stroke", "color")));
 
     const VirtualNode: go.Node = $(go.Node, "Position",
@@ -133,9 +134,9 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
     )
 );
     const linkTemplate = $(go.Link,  // the whole link panel
-        { toShortLength: 3, relinkableFrom: true, relinkableTo: true },
+        { fromShortLength:0,toShortLength: 6, relinkableFrom: true, relinkableTo: true },
         $(go.Shape,  // the link shape
-            { strokeWidth: 2 },
+            { strokeWidth: 3 },
             new go.Binding("stroke", "color")),
         $(go.Shape,  // the arrowhead
             { toArrow: "OpenTriangle", stroke: null },
@@ -151,8 +152,7 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
                     margin: new go.Margin(0, 4, 4, 4)  // margin to create space between the text and the line
                 },
                 new go.Binding("text", "name")),
-            $(go.Shape, "LineH",  // horizontal line to separate the name and value
-                { stroke: "#333", strokeWidth: 1, height: 1, width: 50 }),
+            
             $(go.TextBlock,  // the text block for the value
                 {
                     font: "bold 12px sans-serif",
@@ -225,14 +225,20 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
                 const partsfrom = from.split('_');
                 const Taskfrom = partsfrom.pop()!; // Entfernt und gibt den letzten Teil zurück
                 const partto = to.split('_')
+                let name = `${from}-${to} `
+                let val = sems.val.toString();
                 const Taskto = partto.pop()
                 console.log("to:",Taskto, "from: ", Taskfrom)
+                if(showNameLink === true){
+                    name = ``
+                    val = ""
+                }
                 if(sems.start.length == 1){
                     if(Taskfrom == Taskto){
-                        linkDataArray.push({ from, to, name: `${from}-${to} `, value: sems.val, category: "normalLink",taskArrow:"Chevron" })
+                        linkDataArray.push({ from, to, name, value: val, category: "normalLink",taskArrow:"Chevron" })
                     
                     }else{
-                        linkDataArray.push({ from, to, name: `${from}-${to} `, value: sems.val, category: "normalLink",taskArrow:"Standard" })
+                        linkDataArray.push({ from, to, name, value: val, category: "normalLink",taskArrow:"Standard" })
                     }
                     
                 }else{
@@ -240,7 +246,7 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
                 }
             }
             if (sems.start.length > 1){
-                linkDataArray.push({ from: JSON.stringify(key), name: 'or_'+sems.end,to: sems.end, color: colors.semaphoreColor.inactive.bg,value:sems.val, category: "normalLink",taskArrow:"Standard" })
+                linkDataArray.push({ from: JSON.stringify(key), name: showNameLink == true ? "":"or"+sems.end,to: sems.end, color: colors.semaphoreColor.inactive.bg,value:sems.val, category: "normalLink",taskArrow:"Standard" })
                 console.log(linkDataArray,nodeDataArray)
             }
             
