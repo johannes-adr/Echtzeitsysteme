@@ -120,16 +120,18 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
     const linkMutex: go.Link = $(go.Link, // the whole link panel
         $(go.Shape, { strokeDashArray: [10, 5] }) // the link shape with dashed pattern
     );
-    const orLink = $(go.Link,  // the whole link panel
-    { toShortLength: 3, relinkableFrom: true, relinkableTo: true },
-    $(go.Shape,  // the link shape
-        { strokeWidth: 2 },
-        new go.Binding("stroke", "color"))
-    );
+    const orLink = $(go.Link,
+    { },
+    $(go.Shape,
+        {strokeWidth: 2},
+        new go.Binding("stroke", "color")));
 
-    const VirtualNode: go.Node = $(go.Node, "Position", 
+    const VirtualNode: go.Node = $(go.Node, "Position",
     { visible: true },  // Mach die virtuelle Node unsichtbar
-  );
+    $(go.Shape, "Circle",
+        { fill: "black", desiredSize: new go.Size(10, 10) } // Schwarzer Kreis mit Größe 5x5
+    )
+);
     const linkTemplate = $(go.Link,  // the whole link panel
         { toShortLength: 3, relinkableFrom: true, relinkableTo: true },
         $(go.Shape,  // the link shape
@@ -234,11 +236,11 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
                     }
                     
                 }else{
-                    linkDataArray.push({from,to:JSON.stringify(key), name: `${from}-${to}`, value: sems.val, category: "orLink" })
+                    linkDataArray.push({from,to:JSON.stringify(key), name: `${from}-${to}`, value: sems.val, category: "orLink",taskArrow:""})
                 }
             }
             if (sems.start.length > 1){
-                linkDataArray.push({ from: JSON.stringify(key), name: 'or_'+sems.end,to: sems.end, color: colors.semaphoreColor.inactive.bg,value:sems.val, category: "normalLink" })
+                linkDataArray.push({ from: JSON.stringify(key), name: 'or_'+sems.end,to: sems.end, color: colors.semaphoreColor.inactive.bg,value:sems.val, category: "normalLink",taskArrow:"Standard" })
                 console.log(linkDataArray,nodeDataArray)
             }
             
