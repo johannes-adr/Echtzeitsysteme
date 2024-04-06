@@ -1,5 +1,6 @@
 export type Semaphore = { start: string[], end: string, val: number }
 export type Activities = { [key: string]: number }
+export type Priorities = { [key: string]: number }
 export type Mutex = string[]
 
 
@@ -8,6 +9,7 @@ export type Coord = {x:number,y:number}
 export type SimulationData = {
     activities: Activities,
     semaphores: Semaphore[],
+    priorities: Priorities
     mutexes: Mutex[],
     position?: {
         activities: {[key: string]: Coord},
@@ -27,6 +29,7 @@ export function parseCSV(csv: string) {
 
     let data: SimulationData = {
         activities: {},
+        priorities: {},
         semaphores: [],
         mutexes: []
     }
@@ -38,7 +41,7 @@ export function parseCSV(csv: string) {
 
             switch (type) {
                 case "activity":
-                    parseActivity(data.activities,line);
+                    parseActivity(data.activities,data.priorities,line);
                     break;
                 case "semaphore":
                     data.semaphores.push(parseSemaphore(line))
@@ -59,16 +62,24 @@ export function parseCSV(csv: string) {
         }
     }
 
+    //Now sort mutex based on priority of its activities
+
+    data.mutexes.forEach(mutex=>{
+        mutex.sort((a1,a2)=>{
+            return data.priorities[a2] - data.priorities[a1]
+        })
+    });
+
     return data;
 }
 
 
 
-function parseActivity(activities: Activities, lines: string[]) {
-    let [name, value] = lines;
+function parseActivity(activities: Activities, priorities: Priorities, lines: string[]) {
+    let [name, value, priority] = lines;
     //assert that an activity
     activities_valid(name);
-
+    priorities[name] = Number.parseInt(priority)
     activities[name] = Number.parseInt(value);
 }
 

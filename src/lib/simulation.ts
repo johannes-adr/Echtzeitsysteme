@@ -4,13 +4,13 @@ import { removeSameProps } from "./utils";
 
 export const EXAMPLE_CSV = `# Activity, activity_task, Duration
 
-Activity, a_1, 3
-Activity, a_2, 1
-Activity, a_3, 1
-Activity, a_4, 1
-Activity, a_5, 3
-Activity, b_5, 3
-Activity, a_6, 2
+Activity, a_1, 1, 7
+Activity, a_2, 1, 6
+Activity, a_3, 1, 5
+Activity, a_4, 4, 16
+Activity, a_5, 4, 3
+Activity, b_5, 4, 3
+Activity, a_6, 4, 2
 
 # Semaphore, Wert, Endwert, Startwert +,
 Semaphore, 0, b_5, a_5
@@ -140,7 +140,7 @@ export class Simulation {
         this.front = state
     }
 
-    doCycle() {
+    doCycle(threads = 10) {
         this.prevState = JSON.parse(JSON.stringify(this.front));
 
         let doLater: Map<string, () => void> = new Map;
@@ -159,6 +159,11 @@ export class Simulation {
 
             let val = this.front.activities[act];
             if (val > 0) {
+                if(threads == 0){
+                    break activityLoop;
+                }
+                threads--;
+
                 doLater.set(`dec act ${act}`, () => {
                     this.front.activities[act]--;
                     //If task is now 0, start other semaphores
@@ -171,7 +176,7 @@ export class Simulation {
                 })
             } else {
                 let sems = this.front.semaphores.filter(s => s.end == act);
-                let isReady = sems.find(sem => sem.val == 0) == undefined;
+                let isReady = sems.find(sem => sem.val == 0) == undefined && sems.length > 0;
 
                 //Every semaphore is != 0 => ready
                 if(isReady){

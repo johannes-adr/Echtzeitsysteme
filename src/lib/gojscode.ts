@@ -29,6 +29,8 @@ interface LinkData {
     taskArrow?: string;
 }
 
+export let showNameLink = true;
+
 export type gojsClickEvent = {typ: "mutex", mutexid: string} | {typ: "semaphore", from: string,to:string} | {typ: "activity", activitName: string};
 export type gojsElementClickEventHandler = (
    event: gojsClickEvent
@@ -53,7 +55,7 @@ export type ColorOptions = {
 
 export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsElementClickEventHandler, colors: ColorOptions) {
     const $ = go.GraphObject.make;
-    let showNameLink = true;
+
     const myDiagram = $(go.Diagram, element, {
         "clickCreatingTool.archetypeNodeData": { text: "Node", color: "white" },
         "commandHandler.archetypeGroupData": { text: "Group", isGroup: true, color: "blue" },
