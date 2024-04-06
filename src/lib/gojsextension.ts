@@ -1,5 +1,7 @@
 import type { ColorOptions } from "./gojscode";
 import type { Simulation } from "./simulation";
+import {showNameLinkStore} from "./gojscode";
+import {get} from 'svelte/store';
 
 export function applyChanges(changes: any, myDiagram: go.Diagram, sim: Simulation, colors: ColorOptions) {
     console.dir(changes)
@@ -26,7 +28,8 @@ export function applyChanges(changes: any, myDiagram: go.Diagram, sim: Simulatio
                 //@ts-ignore
                 const link = myDiagram.model.linkDataArray.find(link => link.from === from && link.to === to);
                 myDiagram.model.setDataProperty(link, "color", toSemVal == 0 ? colors.semaphoreColor.inactive.bg : colors.semaphoreColor.active.bg);
-                myDiagram.model.setDataProperty(link, "value", toSemVal);
+                
+                myDiagram.model.setDataProperty(link, "value", get(showNameLinkStore) == false ? toSemVal : '');
             }else{
                 let keyNode:string ='null';
                 let to = sems.end;
@@ -41,7 +44,7 @@ export function applyChanges(changes: any, myDiagram: go.Diagram, sim: Simulatio
                 //@ts-ignore
                 const finalLink = myDiagram.model.linkDataArray.find(link => link.from === keyNode && link.to === sems.end);
                 myDiagram.model.setDataProperty(finalLink, "color", toSemVal == 0 ? colors.semaphoreColor.inactive.bg : colors.semaphoreColor.active.bg);
-                myDiagram.model.setDataProperty(finalLink, "value", toSemVal);
+                myDiagram.model.setDataProperty(finalLink, "value", get(showNameLinkStore) == false ? toSemVal : '');
                 
                    
             }
