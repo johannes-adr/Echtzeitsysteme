@@ -3,6 +3,7 @@ import { Simulation } from "./simulation";
 import { download } from "./utils";
 import { parseCSV, type SimulationData } from "./nodes";
 import { applyChanges } from "./gojsextension";
+import { get, writable } from "svelte/store";
 interface NodeData {
     key: string;
     text?: string;
@@ -29,7 +30,7 @@ interface LinkData {
     taskArrow?: string;
 }
 
-export let showNameLink = true;
+export let showNameLinkStore = writable(true);
 
 export type gojsClickEvent = {typ: "mutex", mutexid: string} | {typ: "semaphore", from: string,to:string} | {typ: "activity", activitName: string};
 export type gojsElementClickEventHandler = (
@@ -197,6 +198,7 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
         }
       });
     function reload(data_loc: SimulationData = data) {
+        let showNameLink = get(showNameLinkStore);
         const nodeDataArray: NodeData[] = [];
         const linkDataArray: LinkData[] = [];
         let sim = new Simulation(data_loc);

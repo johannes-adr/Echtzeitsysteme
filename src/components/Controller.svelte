@@ -4,18 +4,24 @@
 
 <script lang="ts">
     import { sim } from "$lib/global";
-    import { onDestroy } from "svelte";
     import { get } from "svelte/store";
+    import CpuCore from "./CPUCore.svelte";
+    import { showNameLinkStore } from "$lib/gojscode";
     let changeHistory: any[] = [];
+
+    let activeThreads: string[] = [];
+
     sim.subscribe((sim) => {
-        sim?.addObserver((change) => {
+        sim?.addObserver((change, threads) => {
             changeHistory.unshift(change);
             if (changeHistory.length > 10) {
                 changeHistory.pop();
             }
+            activeThreads = threads;
             changeHistory = changeHistory;
         });
     });
+
     let autoCycle = autoCycleInterval !== undefined;
     let interval = "1000";
 
@@ -32,6 +38,10 @@
                 get(sim)?.doCycle();
             }, Number.parseInt(interval));
         }
+    }
+
+    function addThread(count: number){
+        if($sim)$sim.threads += count;
     }
 
     // onDestroy(()=>{
@@ -69,6 +79,33 @@
                         <input type="number" class="grow" bind:value={interval} />
                         <span class="indicator-item badge badge-secondary">ms</span>
                     </label>
+                </div>
+            </section>
+
+            <section>
+                <h2>Show Links</h2>
+                <input
+                        type="checkbox"
+                        class="toggle"
+                        bind:checked={$showNameLinkStore}
+                    />
+            </section>
+
+            <section>
+                <h2 class="flex justify-between">
+                    <span>Threads ({activeThreads.length}/{$sim?.threads ?? 0})</span>
+                    <span class="flex flex-row gap-3">
+                        <button class=" bg-base-300 w-7 text-center rounded" on:click={()=>addThread(1)}>+</button> 
+                        <button class=" bg-base-300 w-7 text-center rounded" on:click={()=>addThread(-1)}>-</button>
+                    </span>
+                </h2>
+                <div class=" grid grid-cols-2 threadgrid">
+                    {#each activeThreads as activity, id}
+                        <CpuCore {id} {activity} />
+                    {/each}
+                    {#each { length: ($sim?.threads ?? 0) - activeThreads.length } as _, id}
+                        <CpuCore id={activeThreads.length + id} />
+                    {/each}
                 </div>
             </section>
         </div>

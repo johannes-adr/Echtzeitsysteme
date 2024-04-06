@@ -47,7 +47,7 @@ Mutex, a_2,a_3,a_4`
 // };
 
 
-type Observer = (changes: Record<string, any>) => void;
+type Observer = (changes: Record<string, any>, threads: string[]) => void;
 
 
 export class Simulation {
@@ -62,6 +62,8 @@ export class Simulation {
     constructor(front: SimulationData) {
         this.loadData(front)
     }
+
+    public threads = 4
 
     loadData(data: SimulationData){
         this.blueprint = data
@@ -81,10 +83,10 @@ export class Simulation {
         this.observers.push(observer);
     }
 
-    notifyObservers() {
+    notifyObservers(threads: string[]) {
         const changes = this.findChanges();
         for (let observer of this.observers) {
-            observer(changes);
+            observer(changes,threads);
         }
     }
 
@@ -140,13 +142,22 @@ export class Simulation {
         this.front = state
     }
 
-    doCycle(threads = 10) {
+    doCycle() {
         this.prevState = JSON.parse(JSON.stringify(this.front));
 
         let doLater: Map<string, () => void> = new Map;
 
+        let activities = Object.keys(this.front.activities);
+
+        //Sort activites for its priorities
+        activities.sort((a1,a2)=>{
+            return this.front.priorities[a2] - this.front.priorities[a1];
+        })
+
+        let threadActChanges: string[] = []
+        let threads = this.threads;
         activityLoop:
-        for (let act in this.front.activities) {
+        for (let act of activities) {
             let mutex = this.front.mutexes.find(m => m.includes(act));
 
             if (mutex) for (let actNameInMutex of mutex) {
@@ -163,6 +174,8 @@ export class Simulation {
                     break activityLoop;
                 }
                 threads--;
+
+                threadActChanges.push(act);
 
                 doLater.set(`dec act ${act}`, () => {
                     this.front.activities[act]--;
@@ -188,7 +201,7 @@ export class Simulation {
 
         doLater.forEach(action => action());
 
-        this.notifyObservers();  // Notify observers after all actions in the cycle
+        this.notifyObservers(threadActChanges);  // Notify observers after all actions in the cycle
     }
 
     getData() {
