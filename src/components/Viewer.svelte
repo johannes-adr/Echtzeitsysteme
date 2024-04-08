@@ -40,12 +40,12 @@
     import { goJsElementClickHandlers, sim } from "$lib/global";
     import type { gojsClickEvent } from "$lib/gojscode";
     import type { SimulationData } from "$lib/nodes";
+    import Centered from "./Centered.svelte";
     import SemaphoreViewer from "./SemaphoreViewer.svelte";
     import ViewerItem from "./ViewerItem.svelte";
 
     let ev: HasSchema<gojsClickEvent> | undefined;
-        $:console.log(ev);
-    ev = { typ: "semaphore",from: "a_1",to: "{\"from\":[\"b_5\",\"a_3\"],\"to\":\"a_1\"}" };
+    $: console.log(ev);
     goJsElementClickHandlers["$$ViewerAdsZgK"] = (evloc) => (ev = evloc);
 
     let immutSimData: SimulationData | undefined;
@@ -62,16 +62,18 @@
 
     $: {
         immutSimData = $activeParseContent;
-        if(currentSimData == undefined){
+        if (currentSimData == undefined) {
             currentSimData = immutSimData;
         }
     }
 </script>
 
 {#if immutSimData == undefined || currentSimData == undefined}
-    <h1>No Data Available</h1>
+    <Centered>
+        <h1>No Data Available</h1></Centered
+    >
 {:else if ev === undefined}
-    <h1>Select an Element</h1>
+    <Centered><h1>Select an Element</h1></Centered>
 {:else}
     <div class="title">
         <span>{NAMES[ev.typ]}</span>
@@ -82,9 +84,8 @@
         </div>
         <span />
     </div>
-        {#if ev.typ == "activity"}
-    <div class="defgrid [&>*]:bg-base-100 [&>*]:rounded-lg">
-
+    {#if ev.typ == "activity"}
+        <div class="defgrid [&>*]:bg-base-100 [&>*]:rounded-lg">
             <ViewerItem title="Task" icon="account_tree"
                 >{ev.activitName.split("_")[1] ?? "?"}</ViewerItem
             >
@@ -92,49 +93,53 @@
                 >{ev.activitName.split("_")[0]}</ViewerItem
             >
             <ViewerItem title="Priority" icon="priority_high"
-                >{(currentSimData?.priorities[ev.activitName] ?? 0)}</ViewerItem
+                >{currentSimData?.priorities[ev.activitName] ?? 0}</ViewerItem
             >
 
             <ViewerItem
                 title="Cyles"
                 icon="cycle"
                 desc={"of " + (immutSimData?.activities[ev.activitName] ?? "?")}
-                >{currentSimData?.activities[ev.activitName] ??
-                    "?"}</ViewerItem
+                >{currentSimData?.activities[ev.activitName] ?? "?"}</ViewerItem
             >
 
             <ViewerItem title="Active" icon="toggle_on"
                 >{(currentSimData?.activities[ev.activitName] ?? 0) !== 0}</ViewerItem
             >
-            
-            </div>
-        {:else if ev.typ == "mutex"}
-    <div class="defgrid [&>*]:bg-base-100 [&>*]:rounded-lg">
-
-                    {#each (immutSimData ?? []).mutexes.find(ex=>
-                            //@ts-ignore
-                            JSON.stringify(ex) == ev.mutexid) ?? [] as actname,num}
-
-                        <div class=" col-span-2">
-                            <ViewerItem title="Priority {num+1}">
-                                Task {actname.split("_")[1]} Activity {actname.split("_")[0]}
-                            </ViewerItem>
-                        </div>
-                    {/each}
-    </div>
-        {:else if ev.typ == "semaphore"}
-            <SemaphoreViewer from={ev.from} to={ev.to} bind:currentSimData={currentSimData} bind:immutSimData={immutSimData} />
-        {/if}
-        <span class="bg-base-100"></span>
+        </div>
+    {:else if ev.typ == "mutex"}
+        <div class="defgrid [&>*]:bg-base-100 [&>*]:rounded-lg">
+            {#each (immutSimData ?? []).mutexes.find((ex) => //@ts-ignore
+                    JSON.stringify(ex) == ev.mutexid) ?? [] as actname, num}
+                <div class=" col-span-2">
+                    <ViewerItem title="Priority {num + 1}">
+                        Task {actname.split("_")[1]} Activity {actname.split("_")[0]}
+                    </ViewerItem>
+                </div>
+            {/each}
+        </div>
+    {:else if ev.typ == "semaphore"}
+        <SemaphoreViewer
+            from={ev.from}
+            to={ev.to}
+            bind:currentSimData
+            bind:immutSimData
+        />
+    {/if}
+    <span class="bg-base-100"></span>
 {/if}
 
 <style>
+    h1{
+        @apply font-bold text-2xl
+    }
+
     .defgrid {
         @apply grid grid-cols-2 gap-2 m-3;
     }
 
-    .defgrid > *{
-        @apply bg-base-100 rounded-lg
+    .defgrid > * {
+        @apply bg-base-100 rounded-lg;
     }
 
     .title {
