@@ -1,6 +1,5 @@
 import type { ColorOptions } from "./gojscode";
 import type { Simulation } from "./simulation";
-
 export function applyChanges(changes: any, myDiagram: go.Diagram, sim: Simulation, colors: ColorOptions) {
     console.dir(changes)
 

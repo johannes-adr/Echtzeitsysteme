@@ -5,11 +5,19 @@
 <script lang="ts">
     import { sim } from "$lib/global";
     import { get } from "svelte/store";
-    import CpuCore from "./CPUCore.svelte";
     import { showNameLinkStore } from "$lib/gojscode";
+    import Centered from "./Centered.svelte";
+    import type { Simulation } from "$lib/simulation";
     let changeHistory: any[] = [];
 
-    let activeThreads: string[] = [];
+    let activeThreads: (string | undefined)[] = [];
+
+    function updateActiveThreads(sim: Simulation){
+        for(let i = activeThreads.length;i < sim.threads;i++){
+                activeThreads.push(undefined)
+        }
+        activeThreads = activeThreads;
+    }
 
     sim.subscribe((sim) => {
         sim?.addObserver((change, threads) => {
@@ -18,10 +26,14 @@
                 changeHistory.pop();
             }
             activeThreads = threads;
+            updateActiveThreads(sim);
             changeHistory = changeHistory;
         });
+        if(sim)updateActiveThreads(sim!);
     });
 
+ 
+    
     let autoCycle = autoCycleInterval !== undefined;
     let interval = "1000";
 
@@ -41,7 +53,16 @@
     }
 
     function addThread(count: number){
-        if($sim)$sim.threads += count;
+        if($sim){
+            $sim.threads += count;
+            if($sim.threads < activeThreads.length){
+                activeThreads.pop();
+                activeThreads = activeThreads;
+            }
+            updateActiveThreads($sim)
+
+        };
+    
     }
 
     // onDestroy(()=>{
@@ -83,7 +104,7 @@
             </section>
 
             <section>
-                <h2>Show Links</h2>
+                <h2>Hide Link Names</h2>
                 <input
                         type="checkbox"
                         class="toggle"
@@ -101,10 +122,16 @@
                 </h2>
                 <div class=" grid grid-cols-2 threadgrid">
                     {#each activeThreads as activity, id}
-                        <CpuCore {id} {activity} />
-                    {/each}
-                    {#each { length: ($sim?.threads ?? 0) - activeThreads.length } as _, id}
-                        <CpuCore id={activeThreads.length + id} />
+                    <div class="group flex flex-col h-24 border rounded m-2 p-2 relative ">
+                        <h2 class="font-bold">Core {id + 1}</h2>
+                        <Centered>
+                            {#if activity}
+                            <span class=" text-success">{activity}</span>
+                            {:else}
+                            <span class=" font-bold text-warning">Idle</span>
+                            {/if}
+                        </Centered>
+                    </div>
                     {/each}
                 </div>
             </section>

@@ -4,6 +4,7 @@ import { download } from "./utils";
 import { parseCSV, type SimulationData } from "./nodes";
 import { applyChanges } from "./gojsextension";
 import { get, writable } from "svelte/store";
+import { browser } from "$app/environment";
 interface NodeData {
     key: string;
     text?: string;
@@ -30,7 +31,12 @@ interface LinkData {
     taskArrow?: string;
 }
 
-export let showNameLinkStore = writable(true);
+export let showNameLinkStore = writable(browser ? localStorage.getItem("showNameLinkStore") === "true" : true);
+
+showNameLinkStore.subscribe(val=>{
+    if(!browser)return;
+    localStorage.setItem("showNameLinkStore",`${val}`);
+})
 
 export type gojsClickEvent = {typ: "mutex", mutexid: string} | {typ: "semaphore", from: string,to:string} | {typ: "activity", activitName: string};
 export type gojsElementClickEventHandler = (

@@ -91,19 +91,22 @@
             <ViewerItem title="Activity" icon="memory"
                 >{ev.activitName.split("_")[0]}</ViewerItem
             >
+            <ViewerItem title="Priority" icon="priority_high"
+                >{(currentSimData?.priorities[ev.activitName] ?? 0)}</ViewerItem
+            >
 
             <ViewerItem
                 title="Cyles"
                 icon="cycle"
                 desc={"of " + (immutSimData?.activities[ev.activitName] ?? "?")}
                 >{currentSimData?.activities[ev.activitName] ??
-                    immutSimData?.activities[ev.activitName] ??
                     "?"}</ViewerItem
             >
 
             <ViewerItem title="Active" icon="toggle_on"
                 >{(currentSimData?.activities[ev.activitName] ?? 0) !== 0}</ViewerItem
             >
+            
             </div>
         {:else if ev.typ == "mutex"}
     <div class="defgrid [&>*]:bg-base-100 [&>*]:rounded-lg">
@@ -120,7 +123,7 @@
                     {/each}
     </div>
         {:else if ev.typ == "semaphore"}
-            <SemaphoreViewer bind:from={ev.from} bind:to={ev.to} bind:currentSimData={currentSimData} bind:immutSimData={immutSimData} />
+            <SemaphoreViewer from={ev.from} to={ev.to} bind:currentSimData={currentSimData} bind:immutSimData={immutSimData} />
         {/if}
         <span class="bg-base-100"></span>
 {/if}
