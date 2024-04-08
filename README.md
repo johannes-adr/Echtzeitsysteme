@@ -24,6 +24,7 @@ Das System besteht aus Aktivitäten und Tasks, wobei Tasks aus mehreren Aktivit�
 - Historie-Tab zur Anzeige vergangener Zustände
 - Viewer-Tab zur detaillierten Anzeige des aktuellen Systemzustands
 - Dark Mode und Light Mode mit ansprechendem Design
+- Observer Pattern
 
 ## Installation und Verwendung
 
