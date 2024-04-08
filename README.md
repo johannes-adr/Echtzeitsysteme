@@ -55,11 +55,3 @@ Mutex, a_1,a_2,a_3
 Dieses Projekt steht unter der [MIT-Lizenz](https://opensource.org/licenses/MIT).
 
 
-- prioritätsvereerbung
-- or pfeil (gojs)
-
-- zurück und vor (nextCycle) (max 50 back)
-- automatisch mit intervall (mit custom timer)
-- csv, reload button (hotload?)
-- abspeichern der elementkoordinaten 
-- element informationen 
