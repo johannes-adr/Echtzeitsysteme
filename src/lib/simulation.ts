@@ -2,7 +2,7 @@ import type { SimulationData } from "./nodes";
 import { removeSameProps } from "./utils";
 
 
-export const EXAMPLE_CSV = `# Activity, activity_task, Duration
+export const EXAMPLE_CSV = `# Activity, activity_task, Duration, Priority
 
 Activity, a_1, 1, 7
 Activity, a_2, 1, 6
