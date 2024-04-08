@@ -2,7 +2,7 @@ import type { SimulationData } from "./nodes";
 import { removeSameProps } from "./utils";
 
 
-export const EXAMPLE_CSV = `# Activity, activity_task, Duration
+export const EXAMPLE_CSV = `# Activity, activity_task, Duration, Priority
 
 Activity, a_1, 1, 7
 Activity, a_2, 1, 6
@@ -144,39 +144,30 @@ export class Simulation {
 
     doCycle() {
         this.prevState = JSON.parse(JSON.stringify(this.front));
-
         let doLater: Map<string, () => void> = new Map;
-
         let activities = Object.keys(this.front.activities);
-
         //Sort activites for its priorities
         activities.sort((a1,a2)=>{
             return this.front.priorities[a2] - this.front.priorities[a1];
         })
-
         let threadActChanges: string[] = []
         let threads = this.threads;
         activityLoop:
         for (let act of activities) {
             let mutex = this.front.mutexes.find(m => m.includes(act));
-
             if (mutex) for (let actNameInMutex of mutex) {
                 if (actNameInMutex == act) break;
                 if (this.front.activities[actNameInMutex] != 0) {
                     continue activityLoop;
                 }
             }
-
-
             let val = this.front.activities[act];
             if (val > 0) {
                 if(threads == 0){
                     break activityLoop;
                 }
                 threads--;
-
                 threadActChanges.push(act);
-
                 doLater.set(`dec act ${act}`, () => {
                     this.front.activities[act]--;
                     //If task is now 0, start other semaphores
@@ -198,9 +189,7 @@ export class Simulation {
                 }
             }
         }
-
         doLater.forEach(action => action());
-
         this.notifyObservers(threadActChanges);  // Notify observers after all actions in the cycle
     }
 
