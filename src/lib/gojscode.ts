@@ -256,7 +256,7 @@ export function initGo(data: SimulationData, element: HTMLDivElement, cb:  gojsE
                 }
             }
             if (sems.start.length > 1){
-                linkDataArray.push({ from: JSON.stringify(key), name: showNameLink == true ? "":"or"+sems.end,to: sems.end, color: colors.semaphoreColor.inactive.bg,value:sems.val, category: "normalLink",taskArrow:"Standard" })
+                linkDataArray.push({ from: JSON.stringify(key), name: showNameLink == true ? "":"or"+sems.end,to: sems.end, color: colors.semaphoreColor.inactive.bg,value:showNameLink == false ? sems.val : '', category: "normalLink",taskArrow:"Standard" })
                 console.log(linkDataArray,nodeDataArray)
             }
             
