@@ -15,7 +15,6 @@ Das System besteht aus Aktivitäten und Tasks, wobei Tasks aus mehreren Aktivit�
 - Gute Anordnung der Nodes beim Generieren
 - Verschieben von Nodes innerhalb der Anwendung
 - Bearbeiten und Anzeigen von CSV-Dateien im Browser
-- Hochladen von Dateien
 - Erstellen, Löschen und Verwalten von Dateien direkt im Browser
 - Persistenz von Dateien selbst nach Neustart der Anwendung
 - Automatischer Ablauf von Tasks
@@ -24,6 +23,8 @@ Das System besteht aus Aktivitäten und Tasks, wobei Tasks aus mehreren Aktivit�
 - Historie-Tab zur Anzeige vergangener Zustände
 - Viewer-Tab zur detaillierten Anzeige des aktuellen Systemzustands
 - Dark Mode und Light Mode mit ansprechendem Design
+- Prozess Überblick
+- Prozess Auswahl
 - Observer Pattern
 
 ## Installation und Verwendung
